@@ -4,22 +4,43 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mallex Shipanga — Creative Portfolio</title>
+  
+  <meta name="description" content="Creative portfolio of Mallex Shipanga — showcasing media technology, journalism, graphic design, photography, and video editing projects.">
+  <meta name="author" content="Mallex Shipanga">
 
-  <!-- PDF.js library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Mallex Shipanga — Creative Portfolio">
+  <meta property="og:description" content="Explore selected creative projects in graphic design, photography, video editing, and feature writing.">
+  <meta property="og:image" content="https://github.com/mallexshipanga.png">
+  
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mallex Shipanga — Creative Portfolio">
+  <meta name="twitter:description" content="Explore selected creative projects in graphic design, photography, video editing, and feature writing.">
+  <meta name="twitter:image" content="https://github.com/mallexshipanga.png">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
 
   <main id="content-wrapper">
     <section id="about-card" class="black-card">
       <div class="profile-container">
-        <img src="https://github.com/mallexshipanga.png" id="profile-pic" alt="Mallex Shipanga">
+        <img 
+          src="https://github.com/mallexshipanga.png" 
+          id="profile-pic" 
+          alt="Mallex Shipanga" 
+          width="150" 
+          height="150" 
+          decoding="async" 
+          loading="eager"
+        >
       </div>
       <div class="about-text">
         <h1>Meet The Creative</h1>
@@ -31,22 +52,27 @@
       </div>
     </section>
 
-<section id="skills-card" class="black-card">
-  <h2>The Creative Skills</h2>
-  <ul class="skills-list">
-    <li><strong>★ Graphic Design:</strong> Canva, Illustrator, InDesign, Photoshop</li>
-    <li><strong>★ Photography &amp; Videography:</strong> DSLR Camera, MILC Camera, Mobile Camera</li>
-    <li><strong>★ Photo &amp; Video Editing:</strong> CapCut, DaVinci Resolve, Lightroom</li>
-    <li><strong>★ Writing:</strong> Features, News, Social Media Content</li>
-  </ul>
-</section>
+    <section id="skills-card" class="black-card">
+      <h2>The Creative Skills</h2>
+      <ul class="skills-list">
+        <li><strong>★ Graphic Design:</strong> Canva, Illustrator, InDesign, Photoshop</li>
+        <li><strong>★ Photography &amp; Videography:</strong> DSLR Camera, MILC Camera, Mobile Camera</li>
+        <li><strong>★ Photo &amp; Video Editing:</strong> CapCut, DaVinci Resolve, Lightroom</li>
+        <li><strong>★ Writing:</strong> Features, News, Social Media Content</li>
+      </ul>
+    </section>
 
-<section id="projects">
-  <h2>The Creative Projects</h2>
-  <div id="projectList" class="projects-grid"></div>
-</section>
+    <section id="projects">
+      <h2>The Creative Projects</h2>
+      <div id="projectList" class="projects-grid"></div>
+    </section>
+  </main>
 
-  <div id="pdfModal" class="modal" aria-hidden="true">
+  <footer id="footer" class="black-card">
+    <p>&copy; Mallex Shipanga. All rights reserved.</p>
+  </footer>
+
+  <div id="pdfModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div id="modalOverlay" class="modal-overlay"></div>
     <div class="modal-container black-card">
       <div class="modal-header">
@@ -58,13 +84,12 @@
         <canvas id="modalPdfCanvas"></canvas>
       </div>
       <div class="modal-footer">
-        <button id="modalPrevPage" class="btn-secondary">Previous</button>
+        <button id="modalPrevPage" class="btn-secondary" aria-label="Previous page">Previous</button>
         <span id="modalPageNum">Page 1</span>
-        <button id="modalNextPage" class="btn-secondary">Next</button>
+        <button id="modalNextPage" class="btn-secondary" aria-label="Next page">Next</button>
       </div>
     </div>
   </div>
 
-  <script src="script.js"></script>
 </body>
 </html>
