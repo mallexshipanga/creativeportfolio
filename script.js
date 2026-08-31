@@ -22,7 +22,6 @@ const defaultProjects = [
   }
 ];
 
-// ---------- PDF viewer ----------
 async function setupPdfViewer(viewerEl, file) {
   const canvas = viewerEl.querySelector('.pdf-canvas');
   const errorEl = viewerEl.querySelector('.pdf-error');
@@ -93,7 +92,6 @@ async function setupPdfViewer(viewerEl, file) {
   }
 }
 
-// ---------- Scroll-in animation ----------
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting) {
@@ -103,7 +101,6 @@ const revealObserver = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.15 });
 
-// ---------- Render projects ----------
 function renderProjects(projects) {
   projectList.innerHTML = '';
   projects.forEach((p) => {
@@ -141,7 +138,6 @@ fetch('creativeprojects.json')
   })
   .catch((e) => console.error("Failed to load creativeprojects.json:", e));
 
-// ---------- Custom cursor (desktop: follows mouse, mobile: tap ripple) ----------
 const cursor = document.getElementById('custom-cursor');
 const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
 
@@ -162,7 +158,6 @@ if (hasFinePointer) {
     el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-hover'));
   });
 } else {
-  // Touch devices: brief ripple at tap point instead of a following cursor
   document.addEventListener('touchstart', (e) => {
     const touch = e.touches[0];
     if (!touch) return;
