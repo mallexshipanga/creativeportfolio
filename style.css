@@ -1,3 +1,8 @@
+To globally justify all paragraph and block text across your stylesheet, you can set `text-align: justify;` on your body tag (or universally via `*`), while ensuring that text-heavy elements like paragraphs inherit or explicitly declare it.
+
+Here is the updated CSS snippet with **full text justification** applied globally:
+
+```css
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
@@ -10,14 +15,18 @@ html, body {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 500;
   color: #000;
+  text-align: justify;          /* Ensures general body text is justified */
+  text-justify: inter-word;     /* Improves word-spacing distribution in supported browsers */
 }
 
 h1, h2, h3 {
   font-weight: 700;
+  text-align: left;             /* Usually best to keep headings left-aligned or centered */
 }
 
 p {
   text-align: justify;
+  text-justify: inter-word;
   line-height: 1.5;
 }
 
@@ -44,6 +53,7 @@ p {
   border-radius: 16px;
   padding: 32px;
   overflow: hidden;
+  text-align: justify;         /* Justifies text inside black cards */
 }
 
 .black-card::after {
@@ -63,6 +73,10 @@ p {
   gap: 32px;
 }
 
+.about-text {
+  text-align: justify;         /* Justifies text in the about section */
+}
+
 #profile-pic {
   width: 150px;
   height: 150px;
@@ -75,6 +89,7 @@ p {
 #skills-card h2,
 #projects h2 {
   margin-top: 0;
+  text-align: left;            /* Keep headings aligned nicely */
 }
 
 .skills-list {
@@ -84,6 +99,7 @@ p {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  text-align: left;            /* Lists typically look better left-aligned */
 }
 
 #projectList {
@@ -102,6 +118,7 @@ p {
   border-radius: 16px;
   padding: 32px 40px;
   overflow: hidden;
+  text-align: justify;         /* Justifies text inside project cards */
 }
 
 .project-preview-wrapper {
@@ -163,6 +180,7 @@ p {
   align-items: center;
   justify-content: center;
   transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+  text-align: center;          /* Button text should remain centered */
 }
 
 .btn-primary {
@@ -190,6 +208,7 @@ p {
   cursor: not-allowed;
 }
 
+/* PDF Modal Styling */
 .modal {
   position: fixed;
   inset: 0;
@@ -292,8 +311,9 @@ p {
     flex-direction: column;
     text-align: center;
   }
-  p {
-    text-align: left;
+  /* Keeps mobile view left-aligned or centered to avoid awkward word-stretching on small screens */
+  p, .about-text, .project-card {
+    text-align: left; 
   }
   .project-card {
     padding: 20px;
@@ -304,3 +324,5 @@ p {
     justify-content: center;
   }
 }
+
+```
