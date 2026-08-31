@@ -202,6 +202,13 @@ p {
   font-weight: 400;
 }
 
+/* PDF Modal Control Rules */
+#pdfModal,
+.modal,
+.modal[aria-hidden="true"] {
+  display: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   #content-wrapper { opacity: 1; animation: none; transform: none; }
