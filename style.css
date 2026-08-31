@@ -1,3 +1,4 @@
+```css
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
@@ -10,8 +11,6 @@ html, body {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 500;
   color: #000;
-  text-align: justify;
-  text-justify: inter-word;
   display: flex;
   flex-direction: column;
 }
@@ -22,21 +21,21 @@ h1, h2, h3 {
 }
 
 p {
-  text-align: justify;
-  text-justify: inter-word;
   line-height: 1.5;
+  margin: 0;
 }
 
 #content-wrapper {
   flex: 1;
   width: 100%;
   box-sizing: border-box;
-  max-width: 1400px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 60px 40px;
+  padding: 60px 20px;
   display: flex;
   flex-direction: column;
-  gap: 60px;
+  align-items: center;
+  gap: 40px;
   opacity: 0;
   animation: pageFadeIn 0.9s ease forwards;
 }
@@ -53,7 +52,9 @@ p {
   border-radius: 16px;
   padding: 32px;
   overflow: hidden;
-  text-align: justify;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .black-card::after {
@@ -69,18 +70,19 @@ p {
 
 #about-card {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 32px;
+  gap: 24px;
 }
 
 .about-text {
-  text-align: justify;
+  text-align: center;
 }
 
 #profile-pic {
-  width: 150px;
-  height: 150px;
-  border-radius: 16px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -99,12 +101,15 @@ p {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  text-align: justify;
+  align-items: center;
+  text-align: center;
 }
 
 #projectList {
+  width: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 32px;
 }
 
@@ -116,9 +121,11 @@ p {
   background: #000;
   color: #fff;
   border-radius: 16px;
-  padding: 32px 40px;
+  padding: 32px;
   overflow: hidden;
-  text-align: justify;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .project-preview-wrapper {
@@ -131,6 +138,7 @@ p {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
 }
 
 .project-preview-wrapper:focus-visible {
@@ -357,14 +365,11 @@ footer p {
 
 @media (max-width: 800px) {
   #content-wrapper {
-    padding: 30px 20px;
+    padding: 30px 16px;
   }
-  #about-card {
-    flex-direction: column;
-    text-align: center;
-  }
+  .black-card,
   .project-card {
-    padding: 20px;
+    padding: 24px 16px;
   }
   .modal-footer {
     flex-wrap: wrap;
@@ -375,3 +380,5 @@ footer p {
     padding: 30px 16px;
   }
 }
+
+```
