@@ -1,11 +1,6 @@
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 const defaultPortfolioData = {
-  "slideshow": [
-    "creativeprojects/01.pdf",
-    "creativeprojects/02.pdf",
-    "creativeprojects/03.pdf"
-  ],
   "projects": [
     {
       "file": "creativeprojects/Campus_Couture.pdf",
@@ -22,11 +17,6 @@ const defaultPortfolioData = {
 
 const state = {
   data: defaultPortfolioData,
-  slideshow: {
-    currentIndex: 0,
-    total: 0,
-    timer: null
-  },
   modal: {
     pdfDoc: null,
     currentPage: 1,
@@ -37,7 +27,6 @@ const state = {
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadData();
-  initSlideshow();
   initProjects();
   initModalListeners();
 });
@@ -88,89 +77,6 @@ async function renderPdfPageToCanvas(pdfUrl, canvas, pageNum = 1, targetWidth = 
     ctx.fillText('Preview Unavailable', canvas.width / 2, canvas.height / 2);
     return 0;
   }
-}
-
-async function initSlideshow() {
-  const wrapper = document.getElementById('slides-wrapper');
-  const dotsContainer = document.getElementById('slideshow-dots');
-  const pdfList = state.data.slideshow || [];
-
-  if (!pdfList.length) return;
-
-  state.slideshow.total = pdfList.length;
-  wrapper.innerHTML = '';
-  dotsContainer.innerHTML = '';
-
-  for (let i = 0; i < pdfList.length; i++) {
-    const pdfUrl = pdfList[i];
-
-    const slide = document.createElement('div');
-    slide.className = `slide ${i === 0 ? 'active' : ''}`;
-    slide.dataset.index = i;
-
-    const canvas = document.createElement('canvas');
-    canvas.className = 'slide-canvas';
-    slide.appendChild(canvas);
-
-    slide.addEventListener('click', () => {
-      openModal(pdfUrl, `Featured Design #${i + 1}`);
-    });
-
-    wrapper.appendChild(slide);
-
-    renderPdfPageToCanvas(pdfUrl, canvas, 1, 900);
-
-    const dot = document.createElement('button');
-    dot.className = `dot ${i === 0 ? 'active' : ''}`;
-    dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
-    dot.addEventListener('click', () => goToSlide(i));
-    dotsContainer.appendChild(dot);
-  }
-
-  document.getElementById('prevSlideBtn').addEventListener('click', () => {
-    changeSlide(-1);
-    resetSlideshowTimer();
-  });
-
-  document.getElementById('nextSlideBtn').addEventListener('click', () => {
-    changeSlide(1);
-    resetSlideshowTimer();
-  });
-
-  startSlideshowTimer();
-}
-
-function changeSlide(direction) {
-  let nextIndex = state.slideshow.currentIndex + direction;
-  if (nextIndex >= state.slideshow.total) nextIndex = 0;
-  if (nextIndex < 0) nextIndex = state.slideshow.total - 1;
-  goToSlide(nextIndex);
-}
-
-function goToSlide(index) {
-  const slides = document.querySelectorAll('.slide');
-  const dots = document.querySelectorAll('.dot');
-
-  slides.forEach((slide, idx) => {
-    slide.classList.toggle('active', idx === index);
-  });
-
-  dots.forEach((dot, idx) => {
-    dot.classList.toggle('active', idx === index);
-  });
-
-  state.slideshow.currentIndex = index;
-}
-
-function startSlideshowTimer() {
-  state.slideshow.timer = setInterval(() => {
-    changeSlide(1);
-  }, 6000);
-}
-
-function resetSlideshowTimer() {
-  clearInterval(state.slideshow.timer);
-  startSlideshowTimer();
 }
 
 function initProjects() {
@@ -228,6 +134,8 @@ function initModalListeners() {
   const overlay = document.getElementById('modalOverlay');
   const prevBtn = document.getElementById('modalPrevPage');
   const nextBtn = document.getElementById('modalNextPage');
+
+  if (!modal) return;
 
   closeModalBtn.addEventListener('click', closeModal);
   overlay.addEventListener('click', closeModal);
