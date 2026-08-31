@@ -133,9 +133,10 @@ p {
   color: #fff;
   border-radius: 16px;
   padding: 24px;
-  overflow: hidden;
+  overflow: visible;
   width: 100%;
   box-sizing: border-box;
+  min-height: auto;
 }
 
 .project-preview-wrapper {
@@ -144,11 +145,12 @@ p {
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
-  max-height: 280px;
+  width: 100%;
+  height: auto;
+  min-height: 280px;
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
   box-sizing: border-box;
 }
 
@@ -189,6 +191,13 @@ p {
 .project-info h3 {
   margin-bottom: 12px;
   font-size: 1.2rem;
+  text-align: left;
+}
+
+.project-info p {
+  text-align: justify;
+  line-height: 1.6;
+  margin-bottom: 16px;
 }
 
 .project-actions {
@@ -351,7 +360,7 @@ p {
   }
 
   .project-preview-wrapper {
-    max-height: 220px;
+    min-height: 220px;
   }
 
   .modal-container {
