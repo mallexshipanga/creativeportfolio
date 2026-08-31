@@ -1,3 +1,6 @@
+That was caused by `border-radius: 50%` in the previous snippet. Here is the complete updated CSS with the image set back to a rounded square (`16px` border-radius) matching your cards.
+
+```css
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
@@ -384,3 +387,5 @@ footer p {
     padding: 24px 16px 36px 16px;
   }
 }
+
+```
