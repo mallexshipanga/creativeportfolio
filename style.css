@@ -71,10 +71,12 @@ p {
 }
 
 #about-card {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  grid-template-rows: auto auto;
+  gap: 24px 20px;
+  align-items: start;
+  clip-path: polygon(120px 0, 100% 0, 100% 100%, 0 100%, 0 120px);
 }
 
 #profile-pic {
@@ -83,10 +85,32 @@ p {
   border-radius: 16px;
   object-fit: cover;
   flex-shrink: 0;
+  grid-column: 1;
+  grid-row: 1;
+  margin: -32px 0 0 -32px;
 }
 
 .about-text {
+  grid-column: 2;
+  grid-row: 1;
   flex: 1;
+}
+
+.about-text h1 {
+  margin-bottom: 16px;
+  font-size: 2rem;
+  text-align: left;
+}
+
+.about-text p {
+  text-align: justify;
+  line-height: 1.6;
+}
+
+.about-text > p {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-top: 8px;
 }
 
 .about-text h1 {
