@@ -1,183 +1,244 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const projects = [
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+const defaultPortfolioData = {
+  "projects": [
     {
-      id: 'proj-1',
-      title: 'Sunflowers: Editorial Photoshoot',
-      description: 'This is an editorial photoshoot I captured and edited in August 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media.',
-      images: [
-        'https://picsum.photos/800/1000?random=1',
-        'https://picsum.photos/800/1000?random=2',
-        'https://picsum.photos/800/1000?random=3'
-      ]
+      "file": "creativeprojects/Campus%20Couture.pdf",
+      "title": "Campus Couture: Thematic Photoessay",
+      "description": "This is a thematic photoessay I created in May 2025. The photoessay features three diverse university students' fashion, exploring how each student uses clothing to express themselves."
     },
     {
-      id: 'proj-2',
-      title: 'Media Technology & Visual Design',
-      description: 'A selection of editorial layouts, visual typography, and digital graphics produced for contemporary publications.',
-      images: [
-        'https://picsum.photos/800/1000?random=4',
-        'https://picsum.photos/800/1000?random=5'
-      ]
+      "file": "creativeprojects/Sunflowers.pdf",
+      "title": "Sunflowers: Editorial Photoshoot",
+      "description": "This is an editorial photoshoot I captured and edited in August 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media."
     }
-  ];
+  ]
+};
 
-  const projectList = document.getElementById('projectList');
-  const pdfModal = document.getElementById('pdfModal');
-  const modalOverlay = document.getElementById('modalOverlay');
-  const closeModalBtn = document.getElementById('closeModalBtn');
-  const modalTitle = document.getElementById('modalTitle');
-  const modalPdfCanvas = document.getElementById('modalPdfCanvas');
-  const modalLoading = document.getElementById('modalLoading');
-  const modalPrevPage = document.getElementById('modalPrevPage');
-  const modalNextPage = document.getElementById('modalNextPage');
-  const modalPageNum = document.getElementById('modalPageNum');
+const state = {
+  data: defaultPortfolioData,
+  currentProjectIndex: 0,
+  modal: {
+    pdfDoc: null,
+    currentPage: 1,
+    totalPages: 0,
+    fileUrl: ''
+  }
+};
 
-  const projectStates = {};
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadData();
+  initProjects();
+  initModalListeners();
+});
 
-  function renderProjects() {
-    if (!projectList) return;
-    projectList.innerHTML = '';
+async function loadData() {
+  try {
+    const response = await fetch('data.json');
+    if (response.ok) {
+      state.data = await response.json();
+    }
+  } catch (e) {
+    console.info('Using embedded default portfolio data.');
+  }
+}
 
-    projects.forEach(project => {
-      projectStates[project.id] = {
-        currentIndex: 0,
-        images: project.images || []
-      };
+async function renderPdfPageToCanvas(pdfUrl, canvas, pageNum = 1, targetWidth = 800) {
+  try {
+    const loadingTask = pdfjsLib.getDocument(pdfUrl);
+    const pdf = await loadingTask.promise;
+    const page = await pdf.getPage(pageNum);
 
-      const card = document.createElement('article');
-      card.className = 'project-card';
-      card.id = project.id;
+    const context = canvas.getContext('2d');
+    const viewport = page.getViewport({ scale: 1 });
 
-      card.innerHTML = `
-        <h3>${project.title}</h3>
-        <p>${project.description}</p>
-        <div class="project-preview-wrapper" tabindex="0" role="button" aria-label="Open preview of ${project.title}">
-          <img class="project-canvas" id="img-${project.id}" src="${project.images[0]}" alt="${project.title}" style="max-width:100%; height:auto; display:block; border-radius:8px;">
-          <div class="preview-overlay">Click to Expand</div>
+    const scale = targetWidth / viewport.width;
+    const scaledViewport = page.getViewport({ scale: Math.max(scale, 1.5) });
+
+    canvas.width = scaledViewport.width;
+    canvas.height = scaledViewport.height;
+
+    const renderContext = {
+      canvasContext: context,
+      viewport: scaledViewport
+    };
+
+    await page.render(renderContext).promise;
+    return pdf.numPages;
+  } catch (error) {
+    console.error(`Error rendering PDF (${pdfUrl}):`, error);
+    const ctx = canvas.getContext('2d');
+    canvas.width = 600;
+    canvas.height = 400;
+    ctx.fillStyle = '#1e1e1e';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '16px "Space Grotesk", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Preview Unavailable', canvas.width / 2, canvas.height / 2);
+    return 0;
+  }
+}
+
+function initProjects() {
+  const projectListContainer = document.getElementById('projectList');
+  const projects = state.data.projects || [];
+
+  projectListContainer.innerHTML = '';
+
+  projects.forEach((proj, idx) => {
+    const card = document.createElement('article');
+    card.className = 'project-card black-card';
+
+    card.innerHTML = `
+      <div class="project-preview-wrapper" id="preview-wrapper-${idx}">
+        <canvas id="project-canvas-${idx}" class="project-canvas"></canvas>
+        <div class="preview-overlay">
+          <span>Click to View Full Project</span>
         </div>
-        <div class="pdf-pagination-controls">
-          <button class="pdf-page-btn prev-btn" aria-label="Previous Image" ${project.images.length <= 1 ? 'disabled' : ''}>&lsaquo;</button>
-          <span class="pdf-page-indicator">Page <span class="current-page">1</span> of <span class="total-pages">${project.images.length}</span></span>
-          <button class="pdf-page-btn next-btn" aria-label="Next Image" ${project.images.length <= 1 ? 'disabled' : ''}>&rsaquo;</button>
+      </div>
+      <div class="project-info">
+        <h3>${escapeHtml(proj.title)}</h3>
+        <p>${escapeHtml(proj.description)}</p>
+        <div class="project-actions">
+          <button class="btn-secondary prev-btn" data-index="${idx}" ${idx === 0 ? 'disabled' : ''}>
+            Previous
+          </button>
+          <button class="btn-secondary next-btn" data-index="${idx}" ${idx === projects.length - 1 ? 'disabled' : ''}>
+            Next
+          </button>
         </div>
-      `;
-
-      projectList.appendChild(card);
-
-      const previewWrapper = card.querySelector('.project-preview-wrapper');
-      const prevBtn = card.querySelector('.prev-btn');
-      const nextBtn = card.querySelector('.next-btn');
-
-      previewWrapper.addEventListener('click', () => openModal(project));
-      previewWrapper.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          openModal(project);
-        }
-      });
-
-      prevBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        changeProjectImage(project.id, -1);
-      });
-
-      nextBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        changeProjectImage(project.id, 1);
-      });
-    });
-  }
-
-  function changeProjectImage(projectId, delta) {
-    const state = projectStates[projectId];
-    if (!state || !state.images.length) return;
-
-    let newIndex = state.currentIndex + delta;
-    if (newIndex < 0) newIndex = state.images.length - 1;
-    if (newIndex >= state.images.length) newIndex = 0;
-
-    state.currentIndex = newIndex;
-
-    const imgEl = document.getElementById(`img-${projectId}`);
-    if (imgEl) {
-      imgEl.src = state.images[newIndex];
-    }
-
-    const card = document.getElementById(projectId);
-    if (card) {
-      card.querySelector('.current-page').textContent = state.currentIndex + 1;
-    }
-  }
-
-  let activeModalProject = null;
-  let activeModalIndex = 0;
-
-  function openModal(project) {
-    if (!pdfModal) return;
-
-    activeModalProject = project;
-    activeModalIndex = projectStates[project.id] ? projectStates[project.id].currentIndex : 0;
-
-    modalTitle.textContent = project.title;
-    pdfModal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-
-    renderModalImage();
-  }
-
-  function closeModal() {
-    if (!pdfModal) return;
-    pdfModal.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-    activeModalProject = null;
-  }
-
-  function renderModalImage() {
-    if (!activeModalProject) return;
-
-    const modalBody = document.querySelector('.modal-body');
-    const images = activeModalProject.images;
-
-    modalBody.innerHTML = `
-      <img src="${images[activeModalIndex]}" alt="${activeModalProject.title}" style="max-width:100%; max-height:70vh; object-fit:contain; display:block; margin:0 auto; border-radius:8px;">
+      </div>
     `;
 
-    modalPageNum.textContent = `Page ${activeModalIndex + 1} of ${images.length}`;
-    modalPrevPage.disabled = images.length <= 1;
-    modalNextPage.disabled = images.length <= 1;
-  }
+    projectListContainer.appendChild(card);
 
-  if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
-  if (modalOverlay) modalOverlay.addEventListener('click', closeModal);
+    const canvas = document.getElementById(`project-canvas-${idx}`);
+    renderPdfPageToCanvas(proj.file, canvas, 1, 600);
 
-  if (modalPrevPage) {
-    modalPrevPage.addEventListener('click', () => {
-      if (!activeModalProject) return;
-      activeModalIndex = (activeModalIndex - 1 + activeModalProject.images.length) % activeModalProject.images.length;
-      renderModalImage();
+    const previewWrapper = document.getElementById(`preview-wrapper-${idx}`);
+    previewWrapper.addEventListener('click', () => {
+      openModal(proj.file, proj.title);
     });
-  }
 
-  if (modalNextPage) {
-    modalNextPage.addEventListener('click', () => {
-      if (!activeModalProject) return;
-      activeModalIndex = (activeModalIndex + 1) % activeModalProject.images.length;
-      renderModalImage();
+    const prevBtn = card.querySelector('.prev-btn');
+    const nextBtn = card.querySelector('.next-btn');
+
+    prevBtn.addEventListener('click', () => {
+      if (idx > 0) {
+        scrollToProject(idx - 1);
+      }
     });
+
+    nextBtn.addEventListener('click', () => {
+      if (idx < projects.length - 1) {
+        scrollToProject(idx + 1);
+      }
+    });
+  });
+}
+
+function scrollToProject(index) {
+  const projects = document.querySelectorAll('.project-card');
+  if (projects[index]) {
+    projects[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+}
+
+function initModalListeners() {
+  const modal = document.getElementById('pdfModal');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const overlay = document.getElementById('modalOverlay');
+  const prevBtn = document.getElementById('modalPrevPage');
+  const nextBtn = document.getElementById('modalNextPage');
+
+  if (!modal) return;
+
+  closeModalBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', closeModal);
 
   document.addEventListener('keydown', (e) => {
-    if (!pdfModal || pdfModal.getAttribute('aria-hidden') === 'true') return;
-    if (e.key === 'Escape') closeModal();
-    if (e.key === 'ArrowLeft' && activeModalProject) {
-      activeModalIndex = (activeModalIndex - 1 + activeModalProject.images.length) % activeModalProject.images.length;
-      renderModalImage();
-    }
-    if (e.key === 'ArrowRight' && activeModalProject) {
-      activeModalIndex = (activeModalIndex + 1) % activeModalProject.images.length;
-      renderModalImage();
+    if (modal.getAttribute('aria-hidden') === 'false') {
+      if (e.key === 'Escape') closeModal();
+      if (e.key === 'ArrowLeft') changeModalPage(-1);
+      if (e.key === 'ArrowRight') changeModalPage(1);
     }
   });
 
-  renderProjects();
-});
+  prevBtn.addEventListener('click', () => changeModalPage(-1));
+  nextBtn.addEventListener('click', () => changeModalPage(1));
+}
+
+async function openModal(pdfUrl, title) {
+  const modal = document.getElementById('pdfModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const loading = document.getElementById('modalLoading');
+
+  modalTitle.textContent = title;
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+
+  loading.style.display = 'block';
+
+  try {
+    const loadingTask = pdfjsLib.getDocument(pdfUrl);
+    state.modal.pdfDoc = await loadingTask.promise;
+    state.modal.totalPages = state.modal.pdfDoc.numPages;
+    state.modal.currentPage = 1;
+    state.modal.fileUrl = pdfUrl;
+
+    await renderModalPage(state.modal.currentPage);
+  } catch (err) {
+    console.error('Failed to load PDF in modal:', err);
+  } finally {
+    loading.style.display = 'none';
+  }
+}
+
+async function renderModalPage(pageNum) {
+  if (!state.modal.pdfDoc) return;
+
+  const canvas = document.getElementById('modalPdfCanvas');
+  const pageNumDisplay = document.getElementById('modalPageNum');
+  const prevBtn = document.getElementById('modalPrevPage');
+  const nextBtn = document.getElementById('modalNextPage');
+
+  const page = await state.modal.pdfDoc.getPage(pageNum);
+  const context = canvas.getContext('2d');
+  
+  const viewport = page.getViewport({ scale: 1.5 });
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+
+  await page.render({ canvasContext: context, viewport }).promise;
+
+  pageNumDisplay.textContent = `Page ${pageNum} of ${state.modal.totalPages}`;
+  prevBtn.disabled = pageNum <= 1;
+  nextBtn.disabled = pageNum >= state.modal.totalPages;
+}
+
+function changeModalPage(direction) {
+  const newPage = state.modal.currentPage + direction;
+  if (newPage >= 1 && newPage <= state.modal.totalPages) {
+    state.modal.currentPage = newPage;
+    renderModalPage(newPage);
+  }
+}
+
+function closeModal() {
+  const modal = document.getElementById('pdfModal');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  state.modal.pdfDoc = null;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
