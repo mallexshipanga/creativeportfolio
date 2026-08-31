@@ -5,23 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mallex Shipanga — Creative Portfolio</title>
 
-  <!-- PDF.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Main Container -->
   <main id="content-wrapper">
 
-    <!-- About Section Card -->
     <section id="about-card" class="black-card">
       <div class="profile-container">
         <img src="https://github.com/mallexshipanga.png" id="profile-pic" alt="Mallex Shipanga">
@@ -36,20 +31,16 @@
       </div>
     </section>
 
-    <!-- Interactive Hero Slideshow -->
     <section id="slideshow-section" class="black-card">
       <h2>Featured Works</h2>
       <div class="slideshow-container">
-        <div id="slides-wrapper" class="slides-wrapper">
-          <!-- Dynamically populated with PDF slide canvases -->
-        </div>
+        <div id="slides-wrapper" class="slides-wrapper"></div>
         <button class="slide-nav prev" id="prevSlideBtn" aria-label="Previous Slide">&#10094;</button>
         <button class="slide-nav next" id="nextSlideBtn" aria-label="Next Slide">&#10095;</button>
         <div id="slideshow-dots" class="slideshow-dots"></div>
       </div>
     </section>
 
-    <!-- Skills Section Card -->
     <section id="skills-card" class="black-card">
       <h2>The Creative Skills</h2>
       <ul class="skills-list">
@@ -60,17 +51,13 @@
       </ul>
     </section>
 
-    <!-- Creative Projects Section -->
     <section id="projects">
       <h2>The Creative Projects</h2>
-      <div id="projectList" class="projects-grid">
-        <!-- Dynamically rendered project cards -->
-      </div>
+      <div id="projectList" class="projects-grid"></div>
     </section>
 
   </main>
 
-  <!-- PDF Reader Modal -->
   <div id="pdfModal" class="modal" aria-hidden="true">
     <div class="modal-overlay" id="modalOverlay"></div>
     <div class="modal-content black-card">
@@ -95,7 +82,6 @@
     </div>
   </div>
 
-  <!-- Main JavaScript File -->
   <script src="script.js"></script>
 </body>
 </html>
