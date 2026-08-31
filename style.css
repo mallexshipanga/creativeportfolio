@@ -21,7 +21,6 @@ p {
   line-height: 1.5;
 }
 
-/* ---------- Page-load fade-in ---------- */
 #content-wrapper {
   max-width: 1400px;
   margin: 0 auto;
@@ -38,7 +37,6 @@ p {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ---------- Cards ---------- */
 .black-card {
   position: relative;
   background: #000;
@@ -48,7 +46,6 @@ p {
   overflow: hidden;
 }
 
-/* Grain / noise texture overlay on all black cards */
 .black-card::after {
   content: "";
   position: absolute;
@@ -88,7 +85,6 @@ p {
   gap: 40px;
 }
 
-/* ---------- Scroll-in reveal ---------- */
 .reveal {
   opacity: 0;
   transform: translateY(40px);
@@ -112,7 +108,6 @@ p {
   overflow: hidden;
 }
 
-/* same grain treatment on project cards */
 .project-card::after {
   content: "";
   position: absolute;
@@ -124,7 +119,6 @@ p {
   background-size: 140px 140px;
 }
 
-/* ---------- PDF viewer + hover effect ---------- */
 .project-card .viewer {
   position: relative;
   background: #fff;
@@ -199,7 +193,6 @@ p {
   font-weight: 400;
 }
 
-/* ---------- Custom cursor (desktop) ---------- */
 #custom-cursor {
   position: fixed;
   top: 0;
@@ -229,13 +222,11 @@ p {
   transform: scale(0.75);
 }
 
-/* Hide custom cursor on touch-only devices so it never renders as a stray dot */
 @media (pointer: coarse) {
   #custom-cursor { display: none; }
   html, body, .pdf-controls button { cursor: auto; }
 }
 
-/* ---------- Tap ripple (mobile equivalent of custom cursor) ---------- */
 .tap-ripple {
   position: fixed;
   width: 20px;
@@ -254,7 +245,6 @@ p {
   to   { transform: scale(2.2); opacity: 0; }
 }
 
-/* ---------- Respect reduced-motion preference ---------- */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   #content-wrapper { opacity: 1; animation: none; transform: none; }
