@@ -84,7 +84,7 @@ p {
 #skills-card h2,
 #projects h2 {
   margin-top: 0;
-  text-align: jusify;
+  text-align: center;
 }
 
 .skills-list {
@@ -94,7 +94,7 @@ p {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  text-align: jusify;
+  text-align: justify;
 }
 
 #projectList {
@@ -288,7 +288,7 @@ p {
 .modal-loading {
   position: absolute;
   color: #fff;
-  display: none; /* Fixed */
+  display: none;
 }
 
 .modal-footer {
@@ -305,9 +305,6 @@ p {
   #about-card {
     flex-direction: column;
     text-align: center;
-  }
-  p, .about-text, .project-card {
-    text-align: left; 
   }
   .project-card {
     padding: 20px;
