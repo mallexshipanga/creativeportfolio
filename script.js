@@ -1,3 +1,4 @@
+// Set CDN worker for PDF.js
 if (typeof pdfjsLib !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
@@ -25,12 +26,8 @@ const defaultPortfolioData = {
 const state = {
   data: defaultPortfolioData,
   pdfDocs: {},
-  currentPages: {},
-  numPages: {},
   modal: {
     pdfDoc: null,
-    currentPage: 1,
-    numPages: 1,
     title: ''
   }
 };
@@ -61,7 +58,6 @@ async function initProjects() {
 
   for (let idx = 0; idx < projects.length; idx++) {
     const proj = projects[idx];
-    state.currentPages[idx] = 1;
 
     const card = document.createElement('article');
     card.className = 'project-card black-card';
@@ -76,11 +72,6 @@ async function initProjects() {
       <div class="project-info">
         <h3>${escapeHtml(proj.title)}</h3>
         <p>${escapeHtml(proj.description)}</p>
-        <div class="project-actions">
-          <button class="btn-secondary prev-btn" data-index="${idx}">&lsaquo;</button>
-          <span class="page-indicator" id="page-indicator-${idx}">Loading PDF...</span>
-          <button class="btn-secondary next-btn" data-index="${idx}">&rsaquo;</button>
-        </div>
       </div>
     `;
 
@@ -89,21 +80,8 @@ async function initProjects() {
     const previewWrapper = document.getElementById(`preview-wrapper-${idx}`);
     previewWrapper.addEventListener('click', () => {
       if (state.pdfDocs[idx]) {
-        openModal(proj, idx, state.currentPages[idx]);
+        openModal(proj, idx);
       }
-    });
-
-    const prevBtn = card.querySelector('.prev-btn');
-    const nextBtn = card.querySelector('.next-btn');
-
-    prevBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      changePage(idx, -1);
-    });
-
-    nextBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      changePage(idx, 1);
     });
 
     loadProjectPdf(idx, proj.file);
@@ -111,19 +89,15 @@ async function initProjects() {
 }
 
 async function loadProjectPdf(idx, pdfUrl) {
-  const indicatorEl = document.getElementById(`page-indicator-${idx}`);
   try {
     const safeUrl = encodeURI(pdfUrl);
     const loadingTask = pdfjsLib.getDocument(safeUrl);
     const pdfDoc = await loadingTask.promise;
 
     state.pdfDocs[idx] = pdfDoc;
-    state.numPages[idx] = pdfDoc.numPages;
-
     renderProjectCanvas(idx, 1);
   } catch (err) {
     console.error(`Error loading PDF for project ${idx}:`, err);
-    if (indicatorEl) indicatorEl.textContent = 'Failed to load PDF';
   }
 }
 
@@ -132,8 +106,6 @@ async function renderProjectCanvas(idx, pageNum) {
   if (!pdfDoc) return;
 
   const canvas = document.getElementById(`project-canvas-${idx}`);
-  const indicatorEl = document.getElementById(`page-indicator-${idx}`);
-
   if (!canvas) return;
 
   try {
@@ -148,33 +120,15 @@ async function renderProjectCanvas(idx, pageNum) {
       canvasContext: context,
       viewport: viewport
     }).promise;
-
-    if (indicatorEl) {
-      indicatorEl.textContent = `Page ${pageNum} of ${pdfDoc.numPages}`;
-    }
   } catch (err) {
     console.error(`Error rendering page ${pageNum}:`, err);
   }
-}
-
-function changePage(idx, direction) {
-  const totalPages = state.numPages[idx] || 1;
-  let currentPage = state.currentPages[idx] || 1;
-
-  currentPage += direction;
-  if (currentPage < 1) currentPage = totalPages;
-  if (currentPage > totalPages) currentPage = 1;
-
-  state.currentPages[idx] = currentPage;
-  renderProjectCanvas(idx, currentPage);
 }
 
 function initModalListeners() {
   const modal = document.getElementById('pdfModal');
   const closeModalBtn = document.getElementById('closeModalBtn');
   const overlay = document.getElementById('modalOverlay');
-  const prevBtn = document.getElementById('modalPrevPage');
-  const nextBtn = document.getElementById('modalNextPage');
 
   if (!modal) return;
 
@@ -184,41 +138,31 @@ function initModalListeners() {
   document.addEventListener('keydown', (e) => {
     if (modal.getAttribute('aria-hidden') === 'false') {
       if (e.key === 'Escape') closeModal();
-      if (e.key === 'ArrowLeft') changeModalPage(-1);
-      if (e.key === 'ArrowRight') changeModalPage(1);
     }
   });
-
-  if (prevBtn) prevBtn.addEventListener('click', () => changeModalPage(-1));
-  if (nextBtn) nextBtn.addEventListener('click', () => changeModalPage(1));
 }
 
-function openModal(project, idx, initialPage = 1) {
+function openModal(project, idx) {
   const modal = document.getElementById('pdfModal');
   const modalTitle = document.getElementById('modalTitle');
 
   state.modal.pdfDoc = state.pdfDocs[idx];
-  state.modal.currentPage = initialPage;
-  state.modal.numPages = state.numPages[idx];
 
   if (modalTitle) modalTitle.textContent = project.title;
   modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
 
-  renderModalCanvas();
+  renderModalCanvas(1);
 }
 
-async function renderModalCanvas() {
+async function renderModalCanvas(pageNum = 1) {
   const pdfDoc = state.modal.pdfDoc;
-  const pageNum = state.modal.currentPage;
   if (!pdfDoc) return;
 
-  const pageNumDisplay = document.getElementById('modalPageNum');
   const modalBody = document.querySelector('.modal-body');
-
   if (!modalBody) return;
-  modalBody.innerHTML = '<canvas id="modalPdfCanvas"></canvas>';
   
+  modalBody.innerHTML = '<canvas id="modalPdfCanvas"></canvas>';
   const canvas = document.getElementById('modalPdfCanvas');
 
   try {
@@ -233,24 +177,9 @@ async function renderModalCanvas() {
       canvasContext: context,
       viewport: viewport
     }).promise;
-
-    if (pageNumDisplay) {
-      pageNumDisplay.textContent = `Page ${pageNum} of ${state.modal.numPages}`;
-    }
   } catch (err) {
     console.error('Error rendering modal page:', err);
   }
-}
-
-function changeModalPage(direction) {
-  const totalPages = state.modal.numPages || 1;
-  let currentPage = state.modal.currentPage + direction;
-
-  if (currentPage < 1) currentPage = totalPages;
-  if (currentPage > totalPages) currentPage = 1;
-
-  state.modal.currentPage = currentPage;
-  renderModalCanvas();
 }
 
 function closeModal() {
@@ -259,7 +188,6 @@ function closeModal() {
   modal.setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';
   state.modal.pdfDoc = null;
-  state.modal.currentPage = 1;
 }
 
 function escapeHtml(str) {
