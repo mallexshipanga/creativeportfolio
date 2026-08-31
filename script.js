@@ -1,189 +1,319 @@
-let pdfReady = false;
-try {
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-  pdfReady = true;
-} catch (e) {
-  console.error("pdf.js failed to load", e);
-}
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-const projectList = document.getElementById('projectList');
+const defaultPortfolioData = {
+  "slideshow": [
+    "creativeprojects/01.pdf",
+    "creativeprojects/02.pdf",
+    "creativeprojects/03.pdf"
+  ],
+  "projects": [
+    {
+      "file": "creativeprojects/Campus_Couture.pdf",
+      "title": "Campus Couture: Thematic Photoessay",
+      "description": "This is a thematic photoessay I created in May 2025. The photoessay features three diverse university students’ fashion, exploring how each student uses clothing to express themselves."
+    },
+    {
+      "file": "creativeprojects/Sunflowers.pdf",
+      "title": "Sunflowers: Editorial Photoshoot",
+      "description": "This is an editorial photoshoot I captured and edited in August 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media."
+    }
+  ]
+};
 
-const defaultProjects = [
-  {
-    "file": "creativeprojects/Campus Couture.pdf",
-    "title": "Campus Couture: Thematic Photoessay",
-    "description": "This is a thematic photoessay I created in May, 2025. The photoessay features three diverse university students’ fashion, exploring how each student uses clothing to express themselves."
+const state = {
+  data: defaultPortfolioData,
+  slideshow: {
+    currentIndex: 0,
+    total: 0,
+    timer: null
   },
-  {
-    "file": "creativeprojects/Sunflowers.pdf",
-    "title": "Sunflowers: Editorial Photoshoot",
-    "description": "This is an editorial photoshoot I captured and edited in August, 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media."
+  modal: {
+    pdfDoc: null,
+    currentPage: 1,
+    totalPages: 0,
+    fileUrl: ''
   }
-];
+};
 
-async function setupPdfViewer(viewerEl, file) {
-  const canvas = viewerEl.querySelector('.pdf-canvas');
-  const errorEl = viewerEl.querySelector('.pdf-error');
-  const ctx = canvas.getContext('2d');
-  const prevBtn = viewerEl.querySelector('.pdf-prev');
-  const nextBtn = viewerEl.querySelector('.pdf-next');
-  const countEl = viewerEl.querySelector('.pdf-count');
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadData();
+  initSlideshow();
+  initProjects();
+  initModalListeners();
+});
 
-  if (!pdfReady) {
-    errorEl.textContent = "PDF viewer failed to load (pdf.js didn't initialize).";
-    errorEl.style.display = 'block';
-    return;
-  }
-
-  let pdfDoc = null;
-  let pageNum = 1;
-  let rendering = false;
-
-  function updateButtons() {
-    prevBtn.disabled = pageNum <= 1;
-    nextBtn.disabled = !pdfDoc || pageNum >= pdfDoc.numPages;
-    countEl.textContent = pdfDoc ? (pageNum + " / " + pdfDoc.numPages) : "";
-  }
-
-  async function renderPage(num) {
-    if (!pdfDoc || rendering) return;
-    rendering = true;
-    try {
-      const page = await pdfDoc.getPage(num);
-      const containerWidth = viewerEl.clientWidth || 400;
-      const base = page.getViewport({ scale: 1 });
-      const scale = containerWidth / base.width;
-      const viewport = page.getViewport({ scale });
-
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = viewport.width * dpr;
-      canvas.height = viewport.height * dpr;
-      canvas.style.width = viewport.width + "px";
-      canvas.style.height = viewport.height + "px";
-
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      await page.render({ canvasContext: ctx, viewport }).promise;
-    } catch (e) {
-      console.error("Failed to render page", num, "of", file, e);
-      errorEl.textContent = "Couldn't render page " + num + ": " + e.message;
-      errorEl.style.display = 'block';
-    } finally {
-      rendering = false;
-      updateButtons();
-    }
-  }
-
-  prevBtn.addEventListener('click', () => {
-    if (pageNum > 1) { pageNum--; renderPage(pageNum); }
-  });
-  nextBtn.addEventListener('click', () => {
-    if (pdfDoc && pageNum < pdfDoc.numPages) { pageNum++; renderPage(pageNum); }
-  });
-  window.addEventListener('resize', () => renderPage(pageNum));
-
+async function loadData() {
   try {
-    pdfDoc = await pdfjsLib.getDocument(encodeURI(file)).promise;
-    renderPage(pageNum);
+    const response = await fetch('data.json');
+    if (response.ok) {
+      state.data = await response.json();
+    }
   } catch (e) {
-    console.error("Failed to load PDF:", file, e);
-    errorEl.textContent = "Couldn't load \"" + file + "\": " + e.message;
-    errorEl.style.display = 'block';
+    console.info('Using embedded default portfolio data.');
   }
 }
 
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('in-view');
-      revealObserver.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.15 });
+async function renderPdfPageToCanvas(pdfUrl, canvas, pageNum = 1, targetWidth = 800) {
+  try {
+    const loadingTask = pdfjsLib.getDocument(pdfUrl);
+    const pdf = await loadingTask.promise;
+    const page = await pdf.getPage(pageNum);
 
-function attachShareButtons() {
-  const shareIconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`;
-  const checkIconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+    const context = canvas.getContext('2d');
+    const viewport = page.getViewport({ scale: 1 });
 
-  document.querySelectorAll('.project-card').forEach((card) => {
-    const desc = card.querySelector('.description');
-    if (!desc.querySelector('.share-btn')) {
-      const shareBtn = document.createElement('button');
-      shareBtn.className = 'share-btn';
-      shareBtn.setAttribute('aria-label', 'Share project');
-      shareBtn.innerHTML = shareIconSvg;
-      shareBtn.addEventListener('click', () => {
-        const title = card.querySelector('h3').textContent;
-        const projectFile = card.dataset.file;
-        const projectUrl = new URL(projectFile, window.location.href).href;
+    const scale = targetWidth / viewport.width;
+    const scaledViewport = page.getViewport({ scale: Math.max(scale, 1.5) });
 
-        if (navigator.share) {
-          navigator.share({ title: title, url: projectUrl }).catch(() => {});
-        } else {
-          navigator.clipboard.writeText(projectUrl);
-          shareBtn.innerHTML = checkIconSvg;
-          setTimeout(() => { shareBtn.innerHTML = shareIconSvg; }, 2000);
-        }
-      });
-      desc.appendChild(shareBtn);
-    }
-  });
+    canvas.width = scaledViewport.width;
+    canvas.height = scaledViewport.height;
+
+    const renderContext = {
+      canvasContext: context,
+      viewport: scaledViewport
+    };
+
+    await page.render(renderContext).promise;
+    return pdf.numPages;
+  } catch (error) {
+    console.error(`Error rendering PDF (${pdfUrl}):`, error);
+    const ctx = canvas.getContext('2d');
+    canvas.width = 600;
+    canvas.height = 400;
+    ctx.fillStyle = '#1e1e1e';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '16px "Space Grotesk", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Preview Unavailable', canvas.width / 2, canvas.height / 2);
+    return 0;
+  }
 }
 
-function attachTiltEffect(card) {
-  card.addEventListener('mousemove', (e) => {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -8;
-    const rotateY = ((x - centerX) / centerX) * 8;
+async function initSlideshow() {
+  const wrapper = document.getElementById('slides-wrapper');
+  const dotsContainer = document.getElementById('slideshow-dots');
+  const pdfList = state.data.slideshow || [];
 
-    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
+  if (!pdfList.length) return;
+
+  state.slideshow.total = pdfList.length;
+  wrapper.innerHTML = '';
+  dotsContainer.innerHTML = '';
+
+  for (let i = 0; i < pdfList.length; i++) {
+    const pdfUrl = pdfList[i];
+
+    const slide = document.createElement('div');
+    slide.className = `slide ${i === 0 ? 'active' : ''}`;
+    slide.dataset.index = i;
+
+    const canvas = document.createElement('canvas');
+    canvas.className = 'slide-canvas';
+    slide.appendChild(canvas);
+
+    slide.addEventListener('click', () => {
+      openModal(pdfUrl, `Featured Design #${i + 1}`);
+    });
+
+    wrapper.appendChild(slide);
+
+    renderPdfPageToCanvas(pdfUrl, canvas, 1, 900);
+
+    const dot = document.createElement('button');
+    dot.className = `dot ${i === 0 ? 'active' : ''}`;
+    dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+    dot.addEventListener('click', () => goToSlide(i));
+    dotsContainer.appendChild(dot);
+  }
+
+  document.getElementById('prevSlideBtn').addEventListener('click', () => {
+    changeSlide(-1);
+    resetSlideshowTimer();
   });
 
-  card.addEventListener('mouseleave', () => {
-    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+  document.getElementById('nextSlideBtn').addEventListener('click', () => {
+    changeSlide(1);
+    resetSlideshowTimer();
   });
+
+  startSlideshowTimer();
 }
 
-function renderProjects(projects) {
-  projectList.innerHTML = '';
-  projects.forEach((p) => {
-    const card = document.createElement('div');
-    card.className = 'project-card reveal';
-    card.dataset.file = p.file;
+function changeSlide(direction) {
+  let nextIndex = state.slideshow.currentIndex + direction;
+  if (nextIndex >= state.slideshow.total) nextIndex = 0;
+  if (nextIndex < 0) nextIndex = state.slideshow.total - 1;
+  goToSlide(nextIndex);
+}
+
+function goToSlide(index) {
+  const slides = document.querySelectorAll('.slide');
+  const dots = document.querySelectorAll('.dot');
+
+  slides.forEach((slide, idx) => {
+    slide.classList.toggle('active', idx === index);
+  });
+
+  dots.forEach((dot, idx) => {
+    dot.classList.toggle('active', idx === index);
+  });
+
+  state.slideshow.currentIndex = index;
+}
+
+function startSlideshowTimer() {
+  state.slideshow.timer = setInterval(() => {
+    changeSlide(1);
+  }, 6000);
+}
+
+function resetSlideshowTimer() {
+  clearInterval(state.slideshow.timer);
+  startSlideshowTimer();
+}
+
+function initProjects() {
+  const projectListContainer = document.getElementById('projectList');
+  const projects = state.data.projects || [];
+
+  projectListContainer.innerHTML = '';
+
+  projects.forEach((proj, idx) => {
+    const card = document.createElement('article');
+    card.className = 'project-card black-card';
+
     card.innerHTML = `
-      <div class="viewer">
-        <canvas class="pdf-canvas"></canvas>
-        <div class="pdf-error"></div>
-        <div class="pdf-controls">
-          <button class="pdf-prev" disabled>‹</button>
-          <span class="pdf-count"></span>
-          <button class="pdf-next" disabled>›</button>
+      <div class="project-preview-wrapper" id="preview-wrapper-${idx}">
+        <canvas id="project-canvas-${idx}" class="project-canvas"></canvas>
+        <div class="preview-overlay">
+          <span>Click to View Full Project</span>
         </div>
       </div>
-      <div class="description">
-        <h3>${p.title}</h3>
-        <p>${p.description}</p>
+      <div class="project-info">
+        <h3>${escapeHtml(proj.title)}</h3>
+        <p>${escapeHtml(proj.description)}</p>
+        <div class="project-actions">
+          <button class="btn-primary view-btn" data-file="${proj.file}" data-title="${escapeHtml(proj.title)}">
+            View PDF
+          </button>
+          <a href="${proj.file}" target="_blank" rel="noopener" class="btn-secondary">
+            Download ↗
+          </a>
+        </div>
       </div>
     `;
-    projectList.appendChild(card);
-    setupPdfViewer(card.querySelector('.viewer'), p.file);
-    revealObserver.observe(card);
-    attachTiltEffect(card);
+
+    projectListContainer.appendChild(card);
+
+    const canvas = document.getElementById(`project-canvas-${idx}`);
+    renderPdfPageToCanvas(proj.file, canvas, 1, 600);
+
+    const previewWrapper = document.getElementById(`preview-wrapper-${idx}`);
+    previewWrapper.addEventListener('click', () => {
+      openModal(proj.file, proj.title);
+    });
+
+    const viewBtn = card.querySelector('.view-btn');
+    viewBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openModal(proj.file, proj.title);
+    });
   });
-  attachShareButtons();
 }
 
-renderProjects(defaultProjects);
+function initModalListeners() {
+  const modal = document.getElementById('pdfModal');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const overlay = document.getElementById('modalOverlay');
+  const prevBtn = document.getElementById('modalPrevPage');
+  const nextBtn = document.getElementById('modalNextPage');
 
-fetch('creativeprojects.json')
-  .then((res) => res.json())
-  .then((data) => {
-    if (data.projects && data.projects.length > 0) {
-      renderProjects(data.projects);
+  closeModalBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', closeModal);
+
+  document.addEventListener('keydown', (e) => {
+    if (modal.getAttribute('aria-hidden') === 'false') {
+      if (e.key === 'Escape') closeModal();
+      if (e.key === 'ArrowLeft') changeModalPage(-1);
+      if (e.key === 'ArrowRight') changeModalPage(1);
     }
-  })
-  .catch((e) => console.error("Failed to load creativeprojects.json:", e));
+  });
+
+  prevBtn.addEventListener('click', () => changeModalPage(-1));
+  nextBtn.addEventListener('click', () => changeModalPage(1));
+}
+
+async function openModal(pdfUrl, title) {
+  const modal = document.getElementById('pdfModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const downloadBtn = document.getElementById('modalDownloadBtn');
+  const loading = document.getElementById('modalLoading');
+
+  modalTitle.textContent = title;
+  downloadBtn.href = pdfUrl;
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+
+  loading.style.display = 'block';
+
+  try {
+    const loadingTask = pdfjsLib.getDocument(pdfUrl);
+    state.modal.pdfDoc = await loadingTask.promise;
+    state.modal.totalPages = state.modal.pdfDoc.numPages;
+    state.modal.currentPage = 1;
+    state.modal.fileUrl = pdfUrl;
+
+    await renderModalPage(state.modal.currentPage);
+  } catch (err) {
+    console.error('Failed to load PDF in modal:', err);
+  } finally {
+    loading.style.display = 'none';
+  }
+}
+
+async function renderModalPage(pageNum) {
+  if (!state.modal.pdfDoc) return;
+
+  const canvas = document.getElementById('modalPdfCanvas');
+  const pageNumDisplay = document.getElementById('modalPageNum');
+  const prevBtn = document.getElementById('modalPrevPage');
+  const nextBtn = document.getElementById('modalNextPage');
+
+  const page = await state.modal.pdfDoc.getPage(pageNum);
+  const context = canvas.getContext('2d');
+  
+  const viewport = page.getViewport({ scale: 1.5 });
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+
+  await page.render({ canvasContext: context, viewport }).promise;
+
+  pageNumDisplay.textContent = `Page ${pageNum} of ${state.modal.totalPages}`;
+  prevBtn.disabled = pageNum <= 1;
+  nextBtn.disabled = pageNum >= state.modal.totalPages;
+}
+
+function changeModalPage(direction) {
+  const newPage = state.modal.currentPage + direction;
+  if (newPage >= 1 && newPage <= state.modal.totalPages) {
+    state.modal.currentPage = newPage;
+    renderModalPage(newPage);
+  }
+}
+
+function closeModal() {
+  const modal = document.getElementById('pdfModal');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  state.modal.pdfDoc = null;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
