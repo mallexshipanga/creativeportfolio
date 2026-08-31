@@ -18,10 +18,12 @@ html, body {
 h1, h2, h3 {
   font-weight: 700;
   text-align: center;
+  margin-top: 0;
 }
 
 p {
-  line-height: 1.5;
+  text-align: left;
+  line-height: 1.6;
   margin: 0;
 }
 
@@ -29,7 +31,7 @@ p {
   flex: 1;
   width: 100%;
   box-sizing: border-box;
-  max-width: 1000px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 60px 20px;
   display: flex;
@@ -54,7 +56,7 @@ p {
   overflow: hidden;
   width: 100%;
   box-sizing: border-box;
-  text-align: center;
+  text-align: left;
 }
 
 .black-card::after {
@@ -76,12 +78,13 @@ p {
 }
 
 .about-text {
-  text-align: center;
+  text-align: left;
+  width: 100%;
 }
 
 #profile-pic {
-  width: 140px;
-  height: 140px;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
@@ -90,7 +93,6 @@ p {
 .about-text h1,
 #skills-card h2,
 #projects h2 {
-  margin-top: 0;
   text-align: center;
 }
 
@@ -101,8 +103,7 @@ p {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  align-items: center;
-  text-align: center;
+  text-align: left;
 }
 
 #projectList {
@@ -117,7 +118,7 @@ p {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
   background: #000;
   color: #fff;
   border-radius: 16px;
@@ -125,7 +126,7 @@ p {
   overflow: hidden;
   width: 100%;
   box-sizing: border-box;
-  text-align: center;
+  text-align: left;
 }
 
 .project-preview-wrapper {
@@ -350,12 +351,16 @@ p {
 
 footer {
   width: 100%;
-  background: transparent;
+  background: none;
   color: #000;
   text-align: center;
-  padding: 40px 20px;
+  padding: 30px 20px 40px 20px;
   margin-top: auto;
   font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 footer p {
@@ -369,7 +374,7 @@ footer p {
   }
   .black-card,
   .project-card {
-    padding: 24px 16px;
+    padding: 24px 20px;
   }
   .modal-footer {
     flex-wrap: wrap;
@@ -377,7 +382,7 @@ footer p {
     justify-content: center;
   }
   footer {
-    padding: 30px 16px;
+    padding: 24px 16px 36px 16px;
   }
 }
 
