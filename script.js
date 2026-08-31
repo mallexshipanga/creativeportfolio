@@ -159,7 +159,9 @@ async function openModal(pdfUrl, title) {
   const loading = document.getElementById('modalLoading');
 
   modalTitle.textContent = title;
-  downloadBtn.href = pdfUrl;
+  if (downloadBtn) {
+    downloadBtn.href = pdfUrl;
+  }
   modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
 
