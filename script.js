@@ -164,35 +164,3 @@ fetch('creativeprojects.json')
     }
   })
   .catch((e) => console.error("Failed to load creativeprojects.json:", e));
-
-const cursor = document.getElementById('custom-cursor');
-const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
-
-if (hasFinePointer) {
-  document.addEventListener('mousemove', (e) => {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
-    cursor.style.opacity = '1';
-  });
-  document.addEventListener('mouseleave', () => {
-    cursor.style.opacity = '0';
-  });
-  document.addEventListener('mousedown', () => cursor.classList.add('cursor-active'));
-  document.addEventListener('mouseup', () => cursor.classList.remove('cursor-active'));
-
-  document.querySelectorAll('#projects, #about-card').forEach((el) => {
-    el.addEventListener('mouseenter', () => cursor.classList.add('cursor-hover'));
-    el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-hover'));
-  });
-} else {
-  document.addEventListener('touchstart', (e) => {
-    const touch = e.touches[0];
-    if (!touch) return;
-    const ripple = document.createElement('div');
-    ripple.className = 'tap-ripple';
-    ripple.style.left = touch.clientX + 'px';
-    ripple.style.top = touch.clientY + 'px';
-    document.body.appendChild(ripple);
-    ripple.addEventListener('animationend', () => ripple.remove());
-  }, { passive: true });
-}
