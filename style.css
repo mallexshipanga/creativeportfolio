@@ -348,37 +348,6 @@ p {
   margin-top: 16px;
 }
 
-/* --- PLAIN FOOTER OVERRIDES --- */
-footer,
-footer.black-card {
-  position: static !important;
-  background: transparent !important;
-  color: #000 !important;
-  border-radius: 0 !important;
-  padding: 30px 20px 40px 20px !important;
-  margin-top: auto !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  text-align: center !important;
-  box-shadow: none !important;
-  border: none !important;
-  overflow: visible !important;
-}
-
-footer::after,
-footer.black-card::after {
-  display: none !important;
-  content: none !important;
-}
-
-footer p {
-  margin: 0 !important;
-  text-align: center !important;
-  color: #000 !important;
-  font-size: 0.875rem !important;
-  font-weight: 500 !important;
-}
-
 @media (max-width: 800px) {
   #content-wrapper {
     padding: 30px 16px;
