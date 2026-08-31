@@ -1,33 +1,37 @@
+// Set CDN worker for PDF.js
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
 const defaultPortfolioData = {
+  "slideshow": [
+    "creativeprojects/01.pdf",
+    "creativeprojects/02.pdf",
+    "creativeprojects/03.pdf"
+  ],
   "projects": [
     {
-      "id": "sunflowers",
-      "title": "Sunflowers: Editorial Photoshoot",
-      "description": "This is an editorial photoshoot I captured and edited in August 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media.",
-      "images": [
-        "images/sunflowers-1.jpg",
-        "images/sunflowers-2.jpg",
-        "images/sunflowers-3.jpg"
-      ]
+      "file": "creativeprojects/Campus Couture.pdf",
+      "title": "Campus Couture: Thematic Photoessay",
+      "description": "This is a thematic photoessay I created in May 2025. The photoessay features three diverse university students' fashion, exploring how each student uses clothing to express themselves."
     },
     {
-      "id": "media-tech",
-      "title": "Media Technology & Visual Design",
-      "description": "A selection of editorial layouts, visual typography, and digital graphics produced for contemporary publications.",
-      "images": [
-        "images/media-tech-1.jpg",
-        "images/media-tech-2.jpg"
-      ]
+      "file": "creativeprojects/Sunflowers.pdf",
+      "title": "Sunflowers: Editorial Photoshoot",
+      "description": "This is an editorial photoshoot I captured and edited in August 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media."
     }
   ]
 };
 
 const state = {
   data: defaultPortfolioData,
-  currentProjectImageIndices: {},
+  pdfDocs: {},
+  currentPages: {},
+  numPages: {},
   modal: {
-    images: [],
-    currentIndex: 0,
+    pdfDoc: null,
+    currentPage: 1,
+    numPages: 1,
     title: ''
   }
 };
@@ -45,26 +49,27 @@ async function loadData() {
       state.data = await response.json();
     }
   } catch (e) {
-    console.info('Using embedded default portfolio data.');
+    console.info('Using default portfolio data.');
   }
 }
 
-function initProjects() {
+async function initProjects() {
   const projectListContainer = document.getElementById('projectList');
   const projects = state.data.projects || [];
 
+  if (!projectListContainer) return;
   projectListContainer.innerHTML = '';
 
-  projects.forEach((proj, idx) => {
-    state.currentProjectImageIndices[idx] = 0;
-    const images = proj.images || [];
+  for (let idx = 0; idx < projects.length; idx++) {
+    const proj = projects[idx];
+    state.currentPages[idx] = 1;
 
     const card = document.createElement('article');
     card.className = 'project-card black-card';
 
     card.innerHTML = `
-      <div class="project-preview-wrapper" id="preview-wrapper-${idx}">
-        <img id="project-img-${idx}" class="project-canvas" src="${images[0] || ''}" alt="${escapeHtml(proj.title)}" style="width:100%; height:auto; display:block; border-radius:8px; object-fit:contain;">
+      <div class="project-preview-wrapper" id="preview-wrapper-${idx}" style="position: relative; cursor: pointer; background: #111; border-radius: 8px; overflow: hidden;">
+        <canvas id="project-canvas-${idx}" class="project-canvas" style="width: 100%; height: auto; display: block; border-radius: 8px;"></canvas>
         <div class="preview-overlay">
           <span>Click to View Full Project</span>
         </div>
@@ -76,7 +81,7 @@ function initProjects() {
           <button class="btn-secondary prev-btn" data-index="${idx}">
             &lsaquo;
           </button>
-          <span class="page-indicator" id="page-indicator-${idx}">Page 1 of ${images.length}</span>
+          <span class="page-indicator" id="page-indicator-${idx}">Loading PDF...</span>
           <button class="btn-secondary next-btn" data-index="${idx}">
             &rsaquo;
           </button>
@@ -88,7 +93,9 @@ function initProjects() {
 
     const previewWrapper = document.getElementById(`preview-wrapper-${idx}`);
     previewWrapper.addEventListener('click', () => {
-      openModal(proj, state.currentProjectImageIndices[idx]);
+      if (state.pdfDocs[idx]) {
+        openModal(proj, idx, state.currentPages[idx]);
+      }
     });
 
     const prevBtn = card.querySelector('.prev-btn');
@@ -96,31 +103,77 @@ function initProjects() {
 
     prevBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      changeInlineImage(idx, -1);
+      changePage(idx, -1);
     });
 
     nextBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      changeInlineImage(idx, 1);
+      changePage(idx, 1);
     });
-  });
+
+    loadProjectPdf(idx, proj.file);
+  }
 }
 
-function changeInlineImage(projectIdx, direction) {
-  const proj = state.data.projects[projectIdx];
-  if (!proj || !proj.images || proj.images.length === 0) return;
+async function loadProjectPdf(idx, pdfUrl) {
+  const indicatorEl = document.getElementById(`page-indicator-${idx}`);
+  try {
+    const safeUrl = encodeURI(pdfUrl);
+    const loadingTask = pdfjsLib.getDocument(safeUrl);
+    const pdfDoc = await loadingTask.promise;
 
-  let newIndex = state.currentProjectImageIndices[projectIdx] + direction;
-  if (newIndex < 0) newIndex = proj.images.length - 1;
-  if (newIndex >= proj.images.length) newIndex = 0;
+    state.pdfDocs[idx] = pdfDoc;
+    state.numPages[idx] = pdfDoc.numPages;
 
-  state.currentProjectImageIndices[projectIdx] = newIndex;
+    renderProjectCanvas(idx, 1);
+  } catch (err) {
+    console.error(`Error loading PDF for project ${idx}:`, err);
+    if (indicatorEl) indicatorEl.textContent = 'Failed to load PDF';
+  }
+}
 
-  const imgEl = document.getElementById(`project-img-${projectIdx}`);
-  const indicatorEl = document.getElementById(`page-indicator-${projectIdx}`);
+async function renderProjectCanvas(idx, pageNum) {
+  const pdfDoc = state.pdfDocs[idx];
+  if (!pdfDoc) return;
 
-  if (imgEl) imgEl.src = proj.images[newIndex];
-  if (indicatorEl) indicatorEl.textContent = `Page ${newIndex + 1} of ${proj.images.length}`;
+  const canvas = document.getElementById(`project-canvas-${idx}`);
+  const indicatorEl = document.getElementById(`page-indicator-${idx}`);
+
+  if (!canvas) return;
+
+  try {
+    const page = await pdfDoc.getPage(pageNum);
+    const viewport = page.getViewport({ scale: 1.5 });
+    const context = canvas.getContext('2d');
+
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    const renderContext = {
+      canvasContext: context,
+      viewport: viewport
+    };
+
+    await page.render(renderContext).promise;
+
+    if (indicatorEl) {
+      indicatorEl.textContent = `Page ${pageNum} of ${pdfDoc.numPages}`;
+    }
+  } catch (err) {
+    console.error(`Error rendering page ${pageNum}:`, err);
+  }
+}
+
+function changePage(idx, direction) {
+  const totalPages = state.numPages[idx] || 1;
+  let currentPage = state.currentPages[idx] || 1;
+
+  currentPage += direction;
+  if (currentPage < 1) currentPage = totalPages;
+  if (currentPage > totalPages) currentPage = 1;
+
+  state.currentPages[idx] = currentPage;
+  renderProjectCanvas(idx, currentPage);
 }
 
 function initModalListeners() {
@@ -147,47 +200,67 @@ function initModalListeners() {
   if (nextBtn) nextBtn.addEventListener('click', () => changeModalPage(1));
 }
 
-function openModal(project, initialIndex = 0) {
+function openModal(project, idx, initialPage = 1) {
   const modal = document.getElementById('pdfModal');
   const modalTitle = document.getElementById('modalTitle');
 
-  state.modal.images = project.images || [];
-  state.modal.currentIndex = initialIndex;
+  state.modal.pdfDoc = state.pdfDocs[idx];
+  state.modal.currentPage = initialPage;
+  state.modal.numPages = state.numPages[idx];
   state.modal.title = project.title;
 
   if (modalTitle) modalTitle.textContent = project.title;
   modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
 
-  renderModalPage();
+  renderModalCanvas();
 }
 
-function renderModalPage() {
-  const images = state.modal.images;
-  const index = state.modal.currentIndex;
+async function renderModalCanvas() {
+  const pdfDoc = state.modal.pdfDoc;
+  const pageNum = state.modal.currentPage;
+  if (!pdfDoc) return;
+
   const pageNumDisplay = document.getElementById('modalPageNum');
-  const modalCanvas = document.getElementById('modalPdfCanvas');
-  const modalContainer = modalCanvas ? modalCanvas.parentElement : document.querySelector('.modal-body');
+  const modalBody = document.querySelector('.modal-body');
 
-  if (modalContainer) {
-    modalContainer.innerHTML = `<img src="${images[index]}" alt="${escapeHtml(state.modal.title)}" style="max-width:100%; max-height:75vh; object-fit:contain; display:block; margin:0 auto; border-radius:8px;">`;
-  }
+  if (!modalBody) return;
+  modalBody.innerHTML = '<canvas id="modalPdfCanvas" style="max-width:100%; max-height:75vh; display:block; margin:0 auto; border-radius:8px;"></canvas>';
+  
+  const canvas = document.getElementById('modalPdfCanvas');
 
-  if (pageNumDisplay) {
-    pageNumDisplay.textContent = `Page ${index + 1} of ${images.length}`;
+  try {
+    const page = await pdfDoc.getPage(pageNum);
+    const viewport = page.getViewport({ scale: 2.0 });
+    const context = canvas.getContext('2d');
+
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    const renderContext = {
+      canvasContext: context,
+      viewport: viewport
+    };
+
+    await page.render(renderContext).promise;
+
+    if (pageNumDisplay) {
+      pageNumDisplay.textContent = `Page ${pageNum} of ${state.modal.numPages}`;
+    }
+  } catch (err) {
+    console.error('Error rendering modal page:', err);
   }
 }
 
 function changeModalPage(direction) {
-  const images = state.modal.images;
-  if (!images || images.length === 0) return;
+  const totalPages = state.modal.numPages || 1;
+  let currentPage = state.modal.currentPage + direction;
 
-  let newIndex = state.modal.currentIndex + direction;
-  if (newIndex < 0) newIndex = images.length - 1;
-  if (newIndex >= images.length) newIndex = 0;
+  if (currentPage < 1) currentPage = totalPages;
+  if (currentPage > totalPages) currentPage = 1;
 
-  state.modal.currentIndex = newIndex;
-  renderModalPage();
+  state.modal.currentPage = currentPage;
+  renderModalCanvas();
 }
 
 function closeModal() {
@@ -195,12 +268,12 @@ function closeModal() {
   if (!modal) return;
   modal.setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';
-  state.modal.images = [];
-  state.modal.currentIndex = 0;
+  state.modal.pdfDoc = null;
+  state.modal.currentPage = 1;
 }
 
 function escapeHtml(str) {
-  return String(str)
+  return String(str || '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
