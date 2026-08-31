@@ -40,13 +40,19 @@
 </section>
 
 <script>
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js";
+  let pdfReady = false;
+  try {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js";
+    pdfReady = true;
+  } catch (e) {
+    console.error("pdf.js failed to load", e);
+  }
 
   const canvas = document.getElementById('canvas');
   const count = document.getElementById('count');
   const projectList = document.getElementById('projectList');
-  
+
   let photos = [
     "creativeprojects/01.pdf",
     "creativeprojects/02.pdf",
@@ -64,6 +70,94 @@
       "file": "creativeprojects/Sunflowers.pdf",
       "title": "Sunflowers",
       "description": "This is a photoshoot I captured and edited in August, 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth."
+    }
+  ];
+
+  async function render(index) {
+    if (!pdfReady || !photos.length) return;
+    try {
+      const doc = await pdfjsLib.getDocument(encodeURI(photos[index])).promise;
+      const page = await doc.getPage(1);
+
+      const base = page.getViewport({ scale: 1 });
+      const scale = Math.max(canvas.parentElement.clientWidth / base.width, canvas.parentElement.clientHeight / base.height);
+      const viewport = page.getViewport({ scale });
+
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+
+      const ctx = canvas.getContext('2d');
+      const offsetX = (canvas.width - viewport.width) / 2;
+      const offsetY = (canvas.height - viewport.height) / 2;
+
+      ctx.setTransform(1, 0, 0, 1, offsetX, offsetY);
+      await page.render({ canvasContext: ctx, viewport }).promise;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+      count.textContent = (index + 1) + " / " + photos.length;
+    } catch (e) {
+      console.error("Failed to render PDF:", photos[index], e);
+    }
+  }
+
+  function renderProjects(projects) {
+    projectList.innerHTML = '';
+    projects.forEach((p) => {
+      const row = document.createElement('div');
+      row.className = 'project-row';
+      row.innerHTML = `
+        <div class="viewer">
+          <iframe src="${encodeURI(p.file)}#view=FitH" title="${p.title}"></iframe>
+        </div>
+        <div class="description-card">
+          <h3>${p.title}</h3>
+          <p>${p.description}</p>
+        </div>
+      `;
+      projectList.appendChild(row);
+    });
+  }
+
+  document.getElementById('prev').addEventListener('click', () => {
+    current = (current - 1 + photos.length) % photos.length;
+    render(current);
+  });
+
+  document.getElementById('next').addEventListener('click', () => {
+    current = (current + 1) % photos.length;
+    render(current);
+  });
+
+  window.addEventListener('resize', () => render(current));
+
+  renderProjects(defaultProjects);
+  render(current);
+
+  fetch('creativeprojects.json')
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.slideshow && data.slideshow.length > 0) {
+        photos = data.slideshow;
+      }
+      if (data.projects && data.projects.length > 0) {
+        renderProjects(data.projects);
+      }
+      render(current);
+    })
+    .catch((e) => console.error("Failed to load creativeprojects.json:", e));
+</script>
+
+
+  const defaultProjects = [
+    {
+      "file": "creativeprojects/Campus Couture.pdf",
+      "title": "Campus Couture: Thematic Photoessay on Student Fashion",
+      "description": "This is a thematic photoessay I created in May, 2025. The thematic photoessay features three diverse university students’ fashion, exploring how each student uses clothing to express who they are."
+    },
+    {
+      "file": "creativeprojects/Sunflowers.pdf",
+      "title": "Sunflowers",
+      "description": "This is a photoshoot I captured and edited in August, 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media."
     }
   ];
 
