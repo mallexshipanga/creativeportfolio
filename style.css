@@ -190,7 +190,6 @@ p {
   cursor: not-allowed;
 }
 
-/* PDF Modal Styling */
 .modal {
   position: fixed;
   inset: 0;
@@ -223,7 +222,7 @@ p {
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  background: #121212; /* FIXED: Added background color so modal isn't see-through */
+  background: #121212;
   padding: 24px;
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(0,0,0,0.5);
