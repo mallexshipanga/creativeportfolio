@@ -191,8 +191,9 @@ p {
 .project-info h3 {
   margin-bottom: 12px;
   font-size: 1.2rem;
-  text-align: left;
+  text-align: center;
 }
+
 
 .project-info p {
   text-align: justify;
