@@ -26,38 +26,21 @@
 
 <section id="projects">
   <h2>Projects</h2>
-  <div class="project-card">
-    <div class="viewer">
-      <iframe src="creativeprojects/campus-couture.pdf" title="Campus Couture photo essay"></iframe>
-    </div>
-    <div class="description">
-      <h3>Campus Couture: Thematic Photoessay on Student Fashion</h3>
-
-      <p>
-        This is a thematic photoessay I created in 2025. The thematic photoessay 
-        features three diverse university students’ fashion, exploring how each
-        student uses clothing to express who they are.
-      </p>
-    </div>
-  </div>
+  <div id="projectList"></div>
 </section>
 
 <script>
-  // List your PDFs here, in order. Put the files in a /creativeprojects folder.
-  const photos = [
-    "creativeprojects/01.pdf",
-    "creativeprojects/02.pdf",
-    "creativeprojects/03.pdf",
-  ];
-
   pdfjsLib.GlobalWorkerOptions.workerSrc =
     "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js";
 
   const canvas = document.getElementById('canvas');
   const count = document.getElementById('count');
+  const projectList = document.getElementById('projectList');
+  let photos = [];
   let current = 0;
 
   async function render(index) {
+    if (!photos.length) return;
     const doc = await pdfjsLib.getDocument(photos[index]).promise;
     const page = await doc.getPage(1);
 
@@ -79,6 +62,24 @@
     count.textContent = (index + 1) + " / " + photos.length;
   }
 
+  function renderProjects(projects) {
+    projectList.innerHTML = '';
+    projects.forEach((p) => {
+      const card = document.createElement('div');
+      card.className = 'project-card';
+      card.innerHTML = `
+        <div class="viewer">
+          <iframe src="${p.file}" title="${p.title}"></iframe>
+        </div>
+        <div class="description">
+          <h3>${p.title}</h3>
+          <p>${p.description}</p>
+        </div>
+      `;
+      projectList.appendChild(card);
+    });
+  }
+
   document.getElementById('prev').addEventListener('click', () => {
     current = (current - 1 + photos.length) % photos.length;
     render(current);
@@ -89,7 +90,15 @@
   });
   window.addEventListener('resize', () => render(current));
 
-  render(current);
+  // Load the PDF list from creativeprojects.json — add new PDFs there,
+  // not in this script.
+  fetch('creativeprojects.json')
+    .then((res) => res.json())
+    .then((data) => {
+      photos = data.slideshow || [];
+      render(current);
+      renderProjects(data.projects || []);
+    });
 </script>
 </body>
 </html>
