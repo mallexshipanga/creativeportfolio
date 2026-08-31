@@ -12,19 +12,28 @@
 </head>
 <body>
 
-<div id="stage">
-  <canvas id="canvas"></canvas>
-  
-  <div id="controls">
-    <button id="prev">Prev</button>
-    <span id="count"></span>
-    <button id="next">Next</button>
-  </div>
-</div>
+<section id="about">
+  <img src="https://github.com/mallexshipanga.png" id="profile-pic" alt="Mallex Shipanga">
+  <h1>Mallex Shipanga</h1>
+  <p>Welcome to my creative portfolio. I explore the intersections of design, technology, and storytelling through various mediums.</p>
+</section>
 
 <section id="projects">
   <h2>Projects</h2>
   <div id="projectList"></div>
+</section>
+
+<section id="stage-container">
+  <h2>Gallery</h2>
+  <div id="stage">
+    <canvas id="canvas"></canvas>
+    
+    <div id="controls">
+      <button id="prev">Prev</button>
+      <span id="count"></span>
+      <button id="next">Next</button>
+    </div>
+  </div>
 </section>
 
 <script>
@@ -34,8 +43,21 @@
   const canvas = document.getElementById('canvas');
   const count = document.getElementById('count');
   const projectList = document.getElementById('projectList');
-  let photos = [];
+  
+  let photos = [
+    "creativeprojects/01.pdf",
+    "creativeprojects/02.pdf",
+    "creativeprojects/03.pdf"
+  ];
   let current = 0;
+
+  const defaultProjects = [
+    {
+      "file": "creativeprojects/Campus Couture.pdf",
+      "title": "Campus Couture: Thematic Photoessay on Student Fashion",
+      "description": "This is a thematic photoessay I created in 2025. The thematic photoessay features three diverse university students’ fashion, exploring how each student uses clothing to express who they are."
+    }
+  ];
 
   async function render(index) {
     if (!photos.length) return;
@@ -43,11 +65,11 @@
     const page = await doc.getPage(1);
 
     const base = page.getViewport({ scale: 1 });
-    const scale = Math.max(window.innerWidth / base.width, window.innerHeight / base.height);
+    const scale = Math.max(canvas.parentElement.clientWidth / base.width, canvas.parentElement.clientHeight / base.height);
     const viewport = page.getViewport({ scale });
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = canvas.parentElement.clientHeight;
 
     const ctx = canvas.getContext('2d');
     const offsetX = (canvas.width - viewport.width) / 2;
@@ -67,7 +89,7 @@
       card.className = 'project-card';
       card.innerHTML = `
         <div class="viewer">
-          <iframe src="${p.file}" title="${p.title}"></iframe>
+          <iframe src="${p.file}#view=FitH" title="${p.title}"></iframe>
         </div>
         <div class="description">
           <h3>${p.title}</h3>
@@ -82,19 +104,29 @@
     current = (current - 1 + photos.length) % photos.length;
     render(current);
   });
+  
   document.getElementById('next').addEventListener('click', () => {
     current = (current + 1) % photos.length;
     render(current);
   });
+  
   window.addEventListener('resize', () => render(current));
+
+  renderProjects(defaultProjects);
+  render(current);
 
   fetch('creativeprojects.json')
     .then((res) => res.json())
     .then((data) => {
-      photos = data.slideshow || [];
+      if(data.slideshow && data.slideshow.length > 0) {
+        photos = data.slideshow;
+      }
+      if(data.projects && data.projects.length > 0) {
+        renderProjects(data.projects);
+      }
       render(current);
-      renderProjects(data.projects || []);
-    });
+    })
+    .catch(() => {});
 </script>
 </body>
 </html>
