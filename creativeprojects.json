@@ -4,11 +4,12 @@
     "creativeprojects/02.pdf",
     "creativeprojects/03.pdf"
   ],
+{
   "projects": [
     {
-      "file": "creativeprojects/Campus_Couture.pdf",
+      "file": "creativeprojects/Campus%20Couture.pdf",
       "title": "Campus Couture: Thematic Photoessay",
-      "description": "This is a thematic photoessay I created in May 2025. The photoessay features three diverse university students’ fashion, exploring how each student uses clothing to express themselves."
+      "description": "This is a thematic photoessay I created in May 2025. The photoessay features three diverse university students' fashion, exploring how each student uses clothing to express themselves."
     },
     {
       "file": "creativeprojects/Sunflowers.pdf",
