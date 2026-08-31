@@ -1,4 +1,3 @@
-// Set CDN worker for PDF.js
 if (typeof pdfjsLib !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
@@ -26,6 +25,8 @@ const defaultPortfolioData = {
 const state = {
   data: defaultPortfolioData,
   pdfDocs: {},
+  currentPages: {},
+  numPages: {},
   modal: {
     pdfDoc: null,
     title: ''
@@ -58,6 +59,7 @@ async function initProjects() {
 
   for (let idx = 0; idx < projects.length; idx++) {
     const proj = projects[idx];
+    state.currentPages[idx] = 1;
 
     const card = document.createElement('article');
     card.className = 'project-card black-card';
@@ -72,6 +74,11 @@ async function initProjects() {
       <div class="project-info">
         <h3>${escapeHtml(proj.title)}</h3>
         <p>${escapeHtml(proj.description)}</p>
+        <div class="project-actions">
+          <button class="btn-secondary prev-btn" data-index="${idx}">&lsaquo;</button>
+          <span class="page-indicator" id="page-indicator-${idx}">Loading PDF...</span>
+          <button class="btn-secondary next-btn" data-index="${idx}">&rsaquo;</button>
+        </div>
       </div>
     `;
 
@@ -84,20 +91,37 @@ async function initProjects() {
       }
     });
 
+    const prevBtn = card.querySelector('.prev-btn');
+    const nextBtn = card.querySelector('.next-btn');
+
+    prevBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      changePage(idx, -1);
+    });
+
+    nextBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      changePage(idx, 1);
+    });
+
     loadProjectPdf(idx, proj.file);
   }
 }
 
 async function loadProjectPdf(idx, pdfUrl) {
+  const indicatorEl = document.getElementById(`page-indicator-${idx}`);
   try {
     const safeUrl = encodeURI(pdfUrl);
     const loadingTask = pdfjsLib.getDocument(safeUrl);
     const pdfDoc = await loadingTask.promise;
 
     state.pdfDocs[idx] = pdfDoc;
+    state.numPages[idx] = pdfDoc.numPages;
+
     renderProjectCanvas(idx, 1);
   } catch (err) {
     console.error(`Error loading PDF for project ${idx}:`, err);
+    if (indicatorEl) indicatorEl.textContent = 'Failed to load PDF';
   }
 }
 
@@ -106,6 +130,8 @@ async function renderProjectCanvas(idx, pageNum) {
   if (!pdfDoc) return;
 
   const canvas = document.getElementById(`project-canvas-${idx}`);
+  const indicatorEl = document.getElementById(`page-indicator-${idx}`);
+
   if (!canvas) return;
 
   try {
@@ -120,9 +146,32 @@ async function renderProjectCanvas(idx, pageNum) {
       canvasContext: context,
       viewport: viewport
     }).promise;
+
+    if (indicatorEl) {
+      indicatorEl.textContent = `Page ${pageNum} of ${pdfDoc.numPages}`;
+    }
+
+    const prevBtn = document.querySelector(`.prev-btn[data-index="${idx}"]`);
+    const nextBtn = document.querySelector(`.next-btn[data-index="${idx}"]`);
+    
+    if (prevBtn) prevBtn.disabled = pageNum === 1;
+    if (nextBtn) nextBtn.disabled = pageNum === pdfDoc.numPages;
+
   } catch (err) {
     console.error(`Error rendering page ${pageNum}:`, err);
   }
+}
+
+function changePage(idx, direction) {
+  const totalPages = state.numPages[idx] || 1;
+  let currentPage = state.currentPages[idx] || 1;
+
+  currentPage += direction;
+  if (currentPage < 1) currentPage = totalPages;
+  if (currentPage > totalPages) currentPage = 1;
+
+  state.currentPages[idx] = currentPage;
+  renderProjectCanvas(idx, currentPage);
 }
 
 function initModalListeners() {
