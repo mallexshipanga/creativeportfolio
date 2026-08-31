@@ -103,9 +103,6 @@ function initProjects() {
           <button class="btn-primary view-btn" data-file="${proj.file}" data-title="${escapeHtml(proj.title)}">
             View PDF
           </button>
-          <a href="${proj.file}" target="_blank" rel="noopener" class="btn-secondary">
-            Download ↗
-          </a>
         </div>
       </div>
     `;
@@ -155,13 +152,9 @@ function initModalListeners() {
 async function openModal(pdfUrl, title) {
   const modal = document.getElementById('pdfModal');
   const modalTitle = document.getElementById('modalTitle');
-  const downloadBtn = document.getElementById('modalDownloadBtn');
   const loading = document.getElementById('modalLoading');
 
   modalTitle.textContent = title;
-  if (downloadBtn) {
-    downloadBtn.href = pdfUrl;
-  }
   modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
 
