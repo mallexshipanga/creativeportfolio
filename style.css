@@ -1,94 +1,71 @@
 html, body { 
   height: 100%; 
   margin: 0; 
-  background: #fff; 
+  background: #ffffff;
+  background-image: radial-gradient(#d3d3d3 1.5px, transparent 1.5px);
+  background-size: 32px 32px;
   scroll-behavior: smooth; 
   font-family: 'Space Grotesk', sans-serif;
+  color: #000;
 }
 
-#stage { 
-  position: relative; 
-  width: 100%; 
-  height: 100vh; 
-  overflow: hidden; 
-  background: #fff;
+#about {
+  position: relative;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 80px 40px;
+  box-sizing: border-box;
 }
 
-#stage canvas { 
-  position: absolute; 
-  inset: 0; 
-  width: 100%; 
-  height: 100%; 
+#about h1 {
+  font-size: 4rem;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  letter-spacing: -2px;
+  text-transform: uppercase;
 }
 
-#controls {
-  position: absolute; 
-  bottom: 40px; 
-  left: 0; 
-  right: 0;
-  height: 40px;
-  z-index: 5;
-  pointer-events: none;
+#about p {
+  font-size: 1.25rem;
+  max-width: 600px;
+  line-height: 1.6;
+  margin: 0;
 }
 
-#controls #prev {
+#profile-pic {
   position: absolute;
-  left: 40px;
-  top: 0;
-  pointer-events: auto;
-}
-
-#controls #next {
-  position: absolute;
+  top: 60px;
   right: 40px;
-  top: 0;
-  pointer-events: auto;
+  width: 140px;
+  height: 140px;
+  border-radius: 0;
+  object-fit: cover;
+  filter: grayscale(100%) contrast(120%);
+  box-shadow: 12px 12px 0 #000;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-#controls #count {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 8px;
-  pointer-events: auto;
-  color: #000;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.2rem;
-  font-weight: bold;
-  text-shadow: 0px 0px 8px rgba(255, 255, 255, 0.9);
+#profile-pic:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: 16px 16px 0 #000;
 }
 
-#controls button {
-  background: transparent; 
-  color: #000; 
-  border: none; 
-  padding: 8px 14px; 
-  cursor: pointer; 
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-shadow: 0px 0px 8px rgba(255, 255, 255, 0.9);
-  transition: transform 0.2s;
+#projects, #stage-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 40px 80px;
+  box-sizing: border-box;
 }
 
-#controls button:hover {
-  transform: scale(1.1);
-}
-
-#projects {
-  background: #fff; 
-  color: #000;
-  padding: 60px 40px 100px;
-}
-
-#projects h2 {
-  color: #000;
-  font-family: 'Space Grotesk', sans-serif;
+h2 {
   font-weight: 700;
   font-size: 3rem;
-  margin: 0 0 24px;
-  letter-spacing: 2px;
+  margin: 0 0 40px 0;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+  display: inline-block;
+  border-bottom: 6px solid #000;
+  padding-bottom: 8px;
 }
 
 #projectList {
@@ -104,13 +81,16 @@ html, body {
   flex: 0 0 100%;
   scroll-snap-align: center;
   display: flex; 
-  gap: 24px;
+  gap: 32px;
   background: #000;
-  border-radius: 16px;
-  padding: 24px;
-  max-width: 1100px;
-  margin: 0 auto;
+  border-radius: 0;
+  padding: 32px;
   box-sizing: border-box;
+  transition: transform 0.3s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-8px);
 }
 
 .project-card .viewer {
@@ -122,31 +102,132 @@ html, body {
   width: 100%;
   height: 600px;
   border: none;
-  border-radius: 8px;
+  border-radius: 0;
   background: #fff; 
 }
 
 .project-card .description {
   flex: 1 1 45%;
-  font-family: 'Space Grotesk', sans-serif;
   color: #fff; 
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .project-card .description h3 {
   margin-top: 0;
-  font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
-  font-size: 2rem;
-  letter-spacing: 1.5px;
+  font-size: 2.2rem;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+  line-height: 1.1;
+  margin-bottom: 20px;
 }
 
 .project-card .description p {
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+#stage { 
+  position: relative; 
+  width: 100%; 
+  height: 75vh; 
+  overflow: hidden; 
+  background: #000;
+  box-shadow: 12px 12px 0 #000;
+}
+
+#stage canvas { 
+  position: absolute; 
+  inset: 0; 
+  width: 100%; 
+  height: 100%; 
+}
+
+#controls {
+  position: absolute; 
+  bottom: 30px; 
+  left: 0; 
+  right: 0;
+  height: 40px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+#controls #prev {
+  position: absolute;
+  left: 30px;
+  top: 0;
+  pointer-events: auto;
+}
+
+#controls #next {
+  position: absolute;
+  right: 30px;
+  top: 0;
+  pointer-events: auto;
+}
+
+#controls #count {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 8px;
+  pointer-events: auto;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: #000;
+  padding: 4px 12px;
+  letter-spacing: 2px;
+}
+
+#controls button {
+  background: transparent; 
+  color: #fff; 
+  border: none; 
+  padding: 8px 14px; 
+  cursor: pointer; 
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: letter-spacing 0.2s ease, transform 0.2s ease;
+  mix-blend-mode: difference;
+}
+
+#controls button:hover {
+  transform: scale(1.1);
+  letter-spacing: 2px;
 }
 
 @media (max-width: 800px) {
+  #about {
+    padding: 120px 20px 40px;
+  }
+  #profile-pic {
+    top: 20px;
+    right: 20px;
+    width: 80px;
+    height: 80px;
+    box-shadow: 6px 6px 0 #000;
+  }
+  #profile-pic:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0 #000;
+  }
+  #projects, #stage-container {
+    padding: 20px 20px 60px;
+  }
+  .project-card { 
+    flex-direction: column; 
+    padding: 20px;
+  }
+  .project-card .viewer iframe { 
+    height: 400px; 
+  }
   #controls #prev { left: 10px; }
   #controls #next { right: 10px; }
-  .project-card { flex-direction: column; }
-  .project-card .viewer iframe { height: 400px; }
 }
