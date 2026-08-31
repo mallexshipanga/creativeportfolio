@@ -288,6 +288,7 @@ p {
 .modal-loading {
   position: absolute;
   color: #fff;
+  display: none; /* Fixed */
 }
 
 .modal-footer {
