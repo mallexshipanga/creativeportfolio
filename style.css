@@ -1,29 +1,95 @@
+html, body { 
+  height: 100%; 
+  margin: 0; 
+  background: #fff; 
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  color: #000;
+}
+
+h1, h2, h3 {
+  text-decoration: underline;
+}
+
+p {
+  text-align: justify;
+  line-height: 1.5;
+}
+
+#content-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 60px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+.black-card {
+  background: #000;
+  color: #fff;
+  border-radius: 16px;
+  padding: 32px;
+}
+
+#about-card {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+#profile-pic {
+  width: 150px;
+  height: 150px;
+  border-radius: 16px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.about-text h1 {
+  margin-top: 0;
+}
+
+#projects h2 {
+  margin-top: 0;
+}
+
 #projectList {
   display: flex;
   flex-direction: column;
   gap: 40px;
 }
 
-.project-row {
+.project-card {
   display: flex;
-  gap: 24px;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 20px;
+  background: #000;
+  color: #fff;
+  border-radius: 16px;
+  padding: 24px;
 }
 
-.project-row .viewer {
-  flex: 1 1 55%;
-  min-width: 0;
+.project-card .viewer {
   position: relative;
   background: #fff;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+  min-height: 200px;
 }
 
-.project-row .viewer canvas {
+.project-card .viewer canvas {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.pdf-error {
+  display: none;
+  padding: 24px;
+  color: #b00020;
+  font-weight: 700;
+  text-align: center;
 }
 
 .pdf-controls {
@@ -62,15 +128,7 @@
   font-size: 0.9rem;
 }
 
-.description-card {
-  flex: 1 1 45%;
-  background: #000;
-  color: #fff;
-  border-radius: 16px;
-  padding: 24px;
-}
-
-.description-card h3 {
+.description h3 {
   margin-top: 0;
 }
 
