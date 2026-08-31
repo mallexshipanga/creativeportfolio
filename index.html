@@ -1,379 +1,91 @@
-html {
-  scroll-behavior: smooth;
-  -webkit-tap-highlight-color: transparent;
-}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mallex Shipanga — Creative Portfolio</title>
+  
+  <meta name="description" content="Creative portfolio of Mallex Shipanga — showcasing media technology, journalism, graphic design, photography, and video editing projects.">
+  <meta name="author" content="Mallex Shipanga">
 
-html, body {
-  min-height: 100vh;
-  margin: 0;
-  background: #fff;
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 500;
-  color: #000;
-  text-align: justify;
-  text-justify: inter-word;
-  display: flex;
-  flex-direction: column;
-}
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Mallex Shipanga — Creative Portfolio">
+  <meta property="og:description" content="Explore selected creative projects in graphic design, photography, video editing, and feature writing.">
+  <meta property="og:image" content="https://github.com/mallexshipanga.png">
+  
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mallex Shipanga — Creative Portfolio">
+  <meta name="twitter:description" content="Explore selected creative projects in graphic design, photography, video editing, and feature writing.">
+  <meta name="twitter:image" content="https://github.com/mallexshipanga.png">
 
-h1, h2, h3 {
-  font-weight: 700;
-  text-align: center;
-}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
 
-p {
-  text-align: justify;
-  text-justify: inter-word;
-  line-height: 1.5;
-}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-#content-wrapper {
-  flex: 1;
-  width: 100%;
-  box-sizing: border-box;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 60px 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 60px;
-  opacity: 0;
-  animation: pageFadeIn 0.9s ease forwards;
-}
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
 
-@keyframes pageFadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+  <main id="content-wrapper">
+    <section id="about-card" class="black-card">
+      <div class="profile-container">
+        <img 
+          src="https://github.com/mallexshipanga.png" 
+          id="profile-pic" 
+          alt="Mallex Shipanga" 
+          width="150" 
+          height="150" 
+          decoding="async" 
+          loading="eager"
+        >
+      </div>
+      <div class="about-text">
+        <h1>Meet The Creative</h1>
+        <p>
+          I am a creative, media practitioner, and saleswoman with an academic background in 
+          journalism and media technology. This creative portfolio exists to showcase the best
+          creative projects I have captured, designed, produced, and/or written in recent time.
+        </p>
+      </div>
+    </section>
 
-.black-card {
-  position: relative;
-  background: #000;
-  color: #fff;
-  border-radius: 16px;
-  padding: 32px;
-  overflow: hidden;
-  text-align: justify;
-}
+    <section id="skills-card" class="black-card">
+      <h2>The Creative Skills</h2>
+      <ul class="skills-list">
+        <li><strong>★ Graphic Design:</strong> Canva, Illustrator, InDesign, Photoshop</li>
+        <li><strong>★ Photography &amp; Videography:</strong> DSLR Camera, MILC Camera, Mobile Camera</li>
+        <li><strong>★ Photo &amp; Video Editing:</strong> CapCut, DaVinci Resolve, Lightroom</li>
+        <li><strong>★ Writing:</strong> Features, News, Social Media Content</li>
+      </ul>
+    </section>
 
-.black-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.06;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 140px 140px;
-}
+    <section id="projects">
+      <h2>The Creative Projects</h2>
+      <div id="projectList" class="projects-grid"></div>
+    </section>
+  </main>
 
-#about-card {
-  display: flex;
-  align-items: center;
-  gap: 32px;
-}
+  <div id="pdfModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div id="modalOverlay" class="modal-overlay"></div>
+    <div class="modal-container black-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Project Title</h3>
+        <button id="closeModalBtn" class="close-btn" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="modalLoading" class="modal-loading">Loading PDF...</div>
+        <canvas id="modalPdfCanvas"></canvas>
+      </div>
+      <div class="modal-footer">
+        <button id="modalPrevPage" class="btn-secondary" aria-label="Previous page">Previous</button>
+        <span id="modalPageNum">Page 1</span>
+        <button id="modalNextPage" class="btn-secondary" aria-label="Next page">Next</button>
+      </div>
+    </div>
+  </div>
 
-.about-text {
-  text-align: justify;
-}
-
-#profile-pic {
-  width: 150px;
-  height: 150px;
-  border-radius: 16px;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.about-text h1,
-#skills-card h2,
-#projects h2 {
-  margin-top: 0;
-  text-align: center;
-}
-
-.skills-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  text-align: justify;
-}
-
-#projectList {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-.project-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  background: #000;
-  color: #fff;
-  border-radius: 16px;
-  padding: 32px 40px;
-  overflow: hidden;
-  text-align: justify;
-}
-
-.project-preview-wrapper {
-  position: relative;
-  background: #111;
-  border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
-  max-height: 400px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.project-preview-wrapper:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 4px;
-}
-
-.project-canvas {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-.preview-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  color: #fff;
-  font-weight: 700;
-}
-
-.project-preview-wrapper:hover .preview-overlay,
-.project-preview-wrapper:focus-visible .preview-overlay {
-  opacity: 1;
-}
-
-.pdf-pagination-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 4px;
-}
-
-.pdf-page-btn {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
-  font-family: inherit;
-}
-
-.pdf-page-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
-}
-
-.pdf-page-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.pdf-page-indicator {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
-  min-width: 90px;
-  text-align: center;
-}
-
-.btn-primary, .btn-secondary {
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 700;
-  text-decoration: none;
-  cursor: pointer;
-  border: none;
-  font-family: inherit;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
-  text-align: center;
-}
-
-.btn-primary {
-  background: #fff;
-  color: #000;
-}
-
-.btn-primary:hover {
-  background: #e6e6e6;
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-1px);
-}
-
-.btn-secondary:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.modal {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-.modal[aria-hidden="false"] {
-  visibility: visible;
-  opacity: 1;
-}
-
-.modal-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(4px);
-}
-
-.modal-container {
-  position: relative;
-  z-index: 1001;
-  width: 90%;
-  max-width: 900px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  background: #121212;
-  padding: 24px;
-  border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.modal-header h3 {
-  margin: 0;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 2rem;
-  cursor: pointer;
-  line-height: 1;
-  transition: opacity 0.2s ease;
-}
-
-.close-btn:hover {
-  opacity: 0.7;
-}
-
-.modal-body {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  min-height: 300px;
-  background: #111;
-  border-radius: 8px;
-}
-
-#modalPdfCanvas {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-.modal-loading {
-  position: absolute;
-  color: #fff;
-  display: none;
-}
-
-.modal-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 16px;
-}
-
-footer {
-  width: 100%;
-  background: #000;
-  color: rgba(255, 255, 255, 0.7);
-  text-align: center;
-  padding: 24px 20px;
-  margin-top: auto;
-  box-sizing: border-radius;
-  border-radius: 0;
-  font-size: 0.875rem;
-}
-
-footer p {
-  margin: 0;
-  text-align: center;
-}
-
-@media (max-width: 800px) {
-  #content-wrapper {
-    padding: 30px 20px;
-  }
-  #about-card {
-    flex-direction: column;
-    text-align: center;
-  }
-  .project-card {
-    padding: 20px;
-  }
-  .modal-footer {
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-  }
-  footer {
-    padding: 20px 16px;
-  }
-}
+</body>
+</html>
