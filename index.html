@@ -27,18 +27,6 @@
   </section>
 </main>
 
-<section id="stage-container">
-  <div id="stage">
-    <canvas id="canvas"></canvas>
-    
-    <div id="controls">
-      <button id="prev">Prev</button>
-      <span id="count"></span>
-      <button id="next">Next</button>
-    </div>
-  </div>
-</section>
-
 <script>
   let pdfReady = false;
   try {
@@ -49,54 +37,81 @@
     console.error("pdf.js failed to load", e);
   }
 
-  const canvas = document.getElementById('canvas');
-  const count = document.getElementById('count');
   const projectList = document.getElementById('projectList');
-
-  let photos = [
-    "creativeprojects/01.pdf",
-    "creativeprojects/02.pdf",
-    "creativeprojects/03.pdf"
-  ];
-  let current = 0;
 
   const defaultProjects = [
     {
       "file": "creativeprojects/Campus Couture.pdf",
       "title": "Campus Couture: Thematic Photoessay on Student Fashion",
-      "description": "This is a thematic photoessay I created in 2025. The photoessay features three diverse university students’ fashion, exploring how each student uses clothing to express who they are."
+      "description": "This is a thematic photoessay I created in May, 2025. The photoessay features three diverse university students’ fashion, exploring how each student uses clothing to express who they are."
     },
     {
       "file": "creativeprojects/Sunflowers.pdf",
-      "title": "Sunflowers",
-      "description": "This is a photoshoot I captured and edited in August, 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth."
+      "title": "Sunflowers: Editorial Photoshoot for Promotional Purposes",
+      "description": "This is an editorial photoshoot I captured and edited in August, 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media."
     }
   ];
 
-  async function render(index) {
-    if (!pdfReady || !photos.length) return;
+  // Sets up a self-contained, paginated PDF viewer inside `viewerEl`.
+  async function setupPdfViewer(viewerEl, file) {
+    if (!pdfReady) return;
+
+    const canvas = viewerEl.querySelector('.pdf-canvas');
+    const ctx = canvas.getContext('2d');
+    const prevBtn = viewerEl.querySelector('.pdf-prev');
+    const nextBtn = viewerEl.querySelector('.pdf-next');
+    const countEl = viewerEl.querySelector('.pdf-count');
+
+    let pdfDoc = null;
+    let pageNum = 1;
+    let rendering = false;
+
+    function updateButtons() {
+      prevBtn.disabled = pageNum <= 1;
+      nextBtn.disabled = !pdfDoc || pageNum >= pdfDoc.numPages;
+      countEl.textContent = pdfDoc ? (pageNum + " / " + pdfDoc.numPages) : "";
+    }
+
+    async function renderPage(num) {
+      if (!pdfDoc || rendering) return;
+      rendering = true;
+      try {
+        const page = await pdfDoc.getPage(num);
+        const containerWidth = viewerEl.clientWidth;
+        const base = page.getViewport({ scale: 1 });
+        const scale = containerWidth / base.width;
+        const viewport = page.getViewport({ scale });
+
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = viewport.width * dpr;
+        canvas.height = viewport.height * dpr;
+        canvas.style.width = viewport.width + "px";
+        canvas.style.height = viewport.height + "px";
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        await page.render({ canvasContext: ctx, viewport }).promise;
+      } catch (e) {
+        console.error("Failed to render page", num, "of", file, e);
+      } finally {
+        rendering = false;
+        updateButtons();
+      }
+    }
+
+    prevBtn.addEventListener('click', () => {
+      if (pageNum > 1) { pageNum--; renderPage(pageNum); }
+    });
+    nextBtn.addEventListener('click', () => {
+      if (pdfDoc && pageNum < pdfDoc.numPages) { pageNum++; renderPage(pageNum); }
+    });
+    window.addEventListener('resize', () => renderPage(pageNum));
+
     try {
-      const doc = await pdfjsLib.getDocument(encodeURI(photos[index])).promise;
-      const page = await doc.getPage(1);
-
-      const base = page.getViewport({ scale: 1 });
-      const scale = Math.max(canvas.parentElement.clientWidth / base.width, canvas.parentElement.clientHeight / base.height);
-      const viewport = page.getViewport({ scale });
-
-      canvas.width = canvas.parentElement.clientWidth;
-      canvas.height = canvas.parentElement.clientHeight;
-
-      const ctx = canvas.getContext('2d');
-      const offsetX = (canvas.width - viewport.width) / 2;
-      const offsetY = (canvas.height - viewport.height) / 2;
-
-      ctx.setTransform(1, 0, 0, 1, offsetX, offsetY);
-      await page.render({ canvasContext: ctx, viewport }).promise;
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-      count.textContent = (index + 1) + " / " + photos.length;
+      pdfDoc = await pdfjsLib.getDocument(encodeURI(file)).promise;
+      renderPage(pageNum);
     } catch (e) {
-      console.error("Failed to render PDF:", photos[index], e);
+      console.error("Failed to load PDF:", file, e);
+      countEl.textContent = "Couldn't load";
     }
   }
 
@@ -107,7 +122,12 @@
       row.className = 'project-row';
       row.innerHTML = `
         <div class="viewer">
-          <iframe src="${encodeURI(p.file)}#view=FitH" title="${p.title}"></iframe>
+          <canvas class="pdf-canvas"></canvas>
+          <div class="pdf-controls">
+            <button class="pdf-prev" disabled>‹</button>
+            <span class="pdf-count"></span>
+            <button class="pdf-next" disabled>›</button>
+          </div>
         </div>
         <div class="description-card">
           <h3>${p.title}</h3>
@@ -115,120 +135,20 @@
         </div>
       `;
       projectList.appendChild(row);
+      setupPdfViewer(row.querySelector('.viewer'), p.file);
     });
   }
 
-  document.getElementById('prev').addEventListener('click', () => {
-    current = (current - 1 + photos.length) % photos.length;
-    render(current);
-  });
-
-  document.getElementById('next').addEventListener('click', () => {
-    current = (current + 1) % photos.length;
-    render(current);
-  });
-
-  window.addEventListener('resize', () => render(current));
-
   renderProjects(defaultProjects);
-  render(current);
 
   fetch('creativeprojects.json')
     .then((res) => res.json())
     .then((data) => {
-      if (data.slideshow && data.slideshow.length > 0) {
-        photos = data.slideshow;
-      }
       if (data.projects && data.projects.length > 0) {
         renderProjects(data.projects);
       }
-      render(current);
     })
     .catch((e) => console.error("Failed to load creativeprojects.json:", e));
-</script>
-
-
-  const defaultProjects = [
-    {
-      "file": "creativeprojects/Campus Couture.pdf",
-      "title": "Campus Couture: Thematic Photoessay on Student Fashion",
-      "description": "This is a thematic photoessay I created in May, 2025. The thematic photoessay features three diverse university students’ fashion, exploring how each student uses clothing to express who they are."
-    },
-    {
-      "file": "creativeprojects/Sunflowers.pdf",
-      "title": "Sunflowers: Editorial Photoshoot for Promotional Purposes",
-      "description": "This is an editorial photoshoot I captured and edited in August, 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media."
-    }
-  ];
-
-  async function render(index) {
-    if (!photos.length) return;
-    const doc = await pdfjsLib.getDocument(photos[index]).promise;
-    const page = await doc.getPage(1);
-
-    const base = page.getViewport({ scale: 1 });
-    const scale = Math.max(canvas.parentElement.clientWidth / base.width, canvas.parentElement.clientHeight / base.height);
-    const viewport = page.getViewport({ scale });
-
-    canvas.width = canvas.parentElement.clientWidth;
-    canvas.height = canvas.parentElement.clientHeight;
-
-    const ctx = canvas.getContext('2d');
-    const offsetX = (canvas.width - viewport.width) / 2;
-    const offsetY = (canvas.height - viewport.height) / 2;
-
-    ctx.setTransform(1, 0, 0, 1, offsetX, offsetY);
-    await page.render({ canvasContext: ctx, viewport }).promise;
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-    count.textContent = (index + 1) + " / " + photos.length;
-  }
-
-  function renderProjects(projects) {
-    projectList.innerHTML = '';
-    projects.forEach((p) => {
-      const card = document.createElement('div');
-      card.className = 'project-card';
-      card.innerHTML = `
-        <div class="viewer">
-          <iframe src="${p.file}#view=FitH" title="${p.title}"></iframe>
-        </div>
-        <div class="description">
-          <h3>${p.title}</h3>
-          <p>${p.description}</p>
-        </div>
-      `;
-      projectList.appendChild(card);
-    });
-  }
-
-  document.getElementById('prev').addEventListener('click', () => {
-    current = (current - 1 + photos.length) % photos.length;
-    render(current);
-  });
-  
-  document.getElementById('next').addEventListener('click', () => {
-    current = (current + 1) % photos.length;
-    render(current);
-  });
-  
-  window.addEventListener('resize', () => render(current));
-
-  renderProjects(defaultProjects);
-  render(current);
-
-  fetch('creativeprojects.json')
-    .then((res) => res.json())
-    .then((data) => {
-      if(data.slideshow && data.slideshow.length > 0) {
-        photos = data.slideshow;
-      }
-      if(data.projects && data.projects.length > 0) {
-        renderProjects(data.projects);
-      }
-      render(current);
-    })
-    .catch(() => {});
 </script>
 </body>
 </html>
