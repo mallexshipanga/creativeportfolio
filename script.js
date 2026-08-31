@@ -20,6 +20,7 @@ const defaultPortfolioData = {
 const state = {
   data: defaultPortfolioData,
   currentProjectIndex: 0,
+  projectPdfStates: [], // Tracks pdfDoc, currentPage, totalPages per project
   modal: {
     pdfDoc: null,
     currentPage: 1,
@@ -30,7 +31,7 @@ const state = {
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadData();
-  initProjects();
+  await initProjects();
   initModalListeners();
 });
 
@@ -45,12 +46,10 @@ async function loadData() {
   }
 }
 
-async function renderPdfPageToCanvas(pdfUrl, canvas, pageNum = 1, targetWidth = 800) {
+async function renderPdfPage(pdfDoc, canvas, pageNum = 1, targetWidth = 600) {
+  if (!pdfDoc) return;
   try {
-    const loadingTask = pdfjsLib.getDocument(pdfUrl);
-    const pdf = await loadingTask.promise;
-    const page = await pdf.getPage(pageNum);
-
+    const page = await pdfDoc.getPage(pageNum);
     const context = canvas.getContext('2d');
     const viewport = page.getViewport({ scale: 1 });
 
@@ -66,29 +65,20 @@ async function renderPdfPageToCanvas(pdfUrl, canvas, pageNum = 1, targetWidth = 
     };
 
     await page.render(renderContext).promise;
-    return pdf.numPages;
   } catch (error) {
-    console.error(`Error rendering PDF (${pdfUrl}):`, error);
-    const ctx = canvas.getContext('2d');
-    canvas.width = 600;
-    canvas.height = 400;
-    ctx.fillStyle = '#1e1e1e';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '16px "Space Grotesk", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Preview Unavailable', canvas.width / 2, canvas.height / 2);
-    return 0;
+    console.error(`Error rendering page ${pageNum}:`, error);
   }
 }
 
-function initProjects() {
+async function initProjects() {
   const projectListContainer = document.getElementById('projectList');
   const projects = state.data.projects || [];
 
   projectListContainer.innerHTML = '';
+  state.projectPdfStates = [];
 
-  projects.forEach((proj, idx) => {
+  for (let idx = 0; idx < projects.length; idx++) {
+    const proj = projects[idx];
     const card = document.createElement('article');
     card.className = 'project-card black-card';
 
@@ -99,51 +89,102 @@ function initProjects() {
           <span>Click to View Full Project</span>
         </div>
       </div>
+      <div class="pdf-pagination-controls">
+        <button class="pdf-page-btn" id="pdf-prev-${idx}" aria-label="Previous Page" disabled>&lt;</button>
+        <span class="pdf-page-indicator" id="pdf-page-indicator-${idx}">Page 1</span>
+        <button class="pdf-page-btn" id="pdf-next-${idx}" aria-label="Next Page" disabled>&gt;</button>
+      </div>
       <div class="project-info">
         <h3>${escapeHtml(proj.title)}</h3>
         <p>${escapeHtml(proj.description)}</p>
-        <div class="project-actions">
-          <button class="btn-secondary prev-btn" data-index="${idx}" ${idx === 0 ? 'disabled' : ''}>
-            Previous
-          </button>
-          <button class="btn-secondary next-btn" data-index="${idx}" ${idx === projects.length - 1 ? 'disabled' : ''}>
-            Next
-          </button>
-        </div>
       </div>
     `;
 
     projectListContainer.appendChild(card);
 
     const canvas = document.getElementById(`project-canvas-${idx}`);
-    renderPdfPageToCanvas(proj.file, canvas, 1, 600);
-
     const previewWrapper = document.getElementById(`preview-wrapper-${idx}`);
+    
     previewWrapper.addEventListener('click', () => {
       openModal(proj.file, proj.title);
     });
 
-    const prevBtn = card.querySelector('.prev-btn');
-    const nextBtn = card.querySelector('.next-btn');
+    // Store state for this project
+    const pdfState = {
+      pdfDoc: null,
+      currentPage: 1,
+      totalPages: 1
+    };
+    state.projectPdfStates.push(pdfState);
 
-    prevBtn.addEventListener('click', () => {
-      if (idx > 0) {
-        scrollToProject(idx - 1);
+    // Load PDF
+    try {
+      if (typeof pdfjsLib !== 'undefined') {
+        const loadingTask = pdfjsLib.getDocument(proj.file);
+        const pdfDoc = await loadingTask.promise;
+        pdfState.pdfDoc = pdfDoc;
+        pdfState.totalPages = pdfDoc.numPages;
+
+        await renderPdfPage(pdfDoc, canvas, 1, 600);
+        updateProjectPaginationUI(idx);
       }
+    } catch (error) {
+      console.error(`Error loading PDF (${proj.file}):`, error);
+      const ctx = canvas.getContext('2d');
+      canvas.width = 600;
+      canvas.height = 400;
+      ctx.fillStyle = '#1e1e1e';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '16px "Space Grotesk", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Preview Unavailable', canvas.width / 2, canvas.height / 2);
+    }
+
+    const prevBtn = card.querySelector(`#pdf-prev-${idx}`);
+    const nextBtn = card.querySelector(`#pdf-next-${idx}`);
+
+    prevBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      changeProjectPage(idx, -1);
     });
 
-    nextBtn.addEventListener('click', () => {
-      if (idx < projects.length - 1) {
-        scrollToProject(idx + 1);
-      }
+    nextBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      changeProjectPage(idx, 1);
     });
-  });
+  }
 }
 
-function scrollToProject(index) {
-  const projects = document.querySelectorAll('.project-card');
-  if (projects[index]) {
-    projects[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+async function changeProjectPage(index, delta) {
+  const pdfState = state.projectPdfStates[index];
+  if (!pdfState || !pdfState.pdfDoc) return;
+
+  const newPage = pdfState.currentPage + delta;
+  if (newPage >= 1 && newPage <= pdfState.totalPages) {
+    pdfState.currentPage = newPage;
+    const canvas = document.getElementById(`project-canvas-${index}`);
+    await renderPdfPage(pdfState.pdfDoc, canvas, pdfState.currentPage, 600);
+    updateProjectPaginationUI(index);
+  }
+}
+
+function updateProjectPaginationUI(index) {
+  const pdfState = state.projectPdfStates[index];
+  if (!pdfState) return;
+
+  const prevBtn = document.getElementById(`pdf-prev-${index}`);
+  const nextBtn = document.getElementById(`pdf-next-${index}`);
+  const indicator = document.getElementById(`pdf-page-indicator-${index}`);
+
+  if (indicator) {
+    indicator.textContent = `Page ${pdfState.currentPage} of ${pdfState.totalPages}`;
+  }
+  if (prevBtn) {
+    prevBtn.disabled = pdfState.currentPage <= 1;
+  }
+  if (nextBtn) {
+    nextBtn.disabled = pdfState.currentPage >= pdfState.totalPages;
   }
 }
 
