@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MALLEX SHIPANGA</title>
+  <title>Mallex Shipanga</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,12 +12,14 @@
 </head>
 <body>
 
+<div id="custom-cursor"></div>
+
 <main id="content-wrapper">
   <section id="about-card" class="black-card">
     <img src="https://github.com/mallexshipanga.png" id="profile-pic" alt="Mallex Shipanga">
     <div class="about-text">
       <h1>ABOUT ME</h1>
-      <p>I am a creative, media student, and saleswoman with experience in the communication and sales industries. Each of my creative projects uses photography, videography, and/or writing because I feel like communication is the bridge between an idea and a community. This craative prtfolio exists to showcase some of my best creative work.</p>
+      <p>I am a creative, media student, and saleswoman with experience in the communication and sales industries. Each of my creative projects uses photography, videography, and/or writing because I feel like communication is the bridge between an idea and a community. This creative portfolio exists to showcase some of my best creative work.</p>
     </div>
   </section>
 
@@ -52,7 +54,7 @@
     }
   ];
 
-  // Sets up a self-contained, paginated PDF viewer inside `viewerEl`.
+  // ---------- PDF viewer ----------
   async function setupPdfViewer(viewerEl, file) {
     const canvas = viewerEl.querySelector('.pdf-canvas');
     const errorEl = viewerEl.querySelector('.pdf-error');
@@ -123,11 +125,22 @@
     }
   }
 
+  // ---------- Scroll-in animation ----------
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  // ---------- Render projects ----------
   function renderProjects(projects) {
     projectList.innerHTML = '';
     projects.forEach((p) => {
       const card = document.createElement('div');
-      card.className = 'project-card';
+      card.className = 'project-card reveal';
       card.innerHTML = `
         <div class="viewer">
           <canvas class="pdf-canvas"></canvas>
@@ -145,6 +158,7 @@
       `;
       projectList.appendChild(card);
       setupPdfViewer(card.querySelector('.viewer'), p.file);
+      revealObserver.observe(card);
     });
   }
 
@@ -158,6 +172,40 @@
       }
     })
     .catch((e) => console.error("Failed to load creativeprojects.json:", e));
+
+  // ---------- Custom cursor (desktop: follows mouse, mobile: tap ripple) ----------
+  const cursor = document.getElementById('custom-cursor');
+  const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
+
+  if (hasFinePointer) {
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+      cursor.style.opacity = '1';
+    });
+    document.addEventListener('mouseleave', () => {
+      cursor.style.opacity = '0';
+    });
+    document.addEventListener('mousedown', () => cursor.classList.add('cursor-active'));
+    document.addEventListener('mouseup', () => cursor.classList.remove('cursor-active'));
+
+    document.querySelectorAll('#projects, #about-card').forEach((el) => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('cursor-hover'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-hover'));
+    });
+  } else {
+    // Touch devices: brief ripple at tap point instead of a following cursor
+    document.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+      const ripple = document.createElement('div');
+      ripple.className = 'tap-ripple';
+      ripple.style.left = touch.clientX + 'px';
+      ripple.style.top = touch.clientY + 'px';
+      document.body.appendChild(ripple);
+      ripple.addEventListener('animationend', () => ripple.remove());
+    }, { passive: true });
+  }
 </script>
 </body>
 </html>
