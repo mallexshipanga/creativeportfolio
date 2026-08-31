@@ -7,23 +7,18 @@
   
   <meta name="description" content="Creative Portfolio">
   <meta name="author" content="Mallex Shipanga">
-
   <meta property="og:type" content="website">
   <meta property="og:title" content="Mallex Shipanga — Creative Portfolio">
   <meta property="og:description" content="Explore selected creative projects in graphic design, photography, video editing, and feature writing.">
   <meta property="og:image" content="https://github.com/mallexshipanga.png">
-  
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Mallex Shipanga — Creative Portfolio">
   <meta name="twitter:description" content="Explore selected creative projects in graphic design, photography, video editing, and feature writing.">
   <meta name="twitter:image" content="https://github.com/mallexshipanga.png">
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="style.css">
   <script src="script.js" defer></script>
 </head>
@@ -31,17 +26,15 @@
 
   <main id="content-wrapper">
     <section id="about-card" class="black-card">
-      <div class="profile-container">
-        <img 
-          src="https://github.com/mallexshipanga.png" 
-          id="profile-pic" 
-          alt="Mallex Shipanga" 
-          width="150" 
-          height="150" 
-          decoding="async" 
-          loading="eager"
-        >
-      </div>
+      <img 
+        src="https://github.com/mallexshipanga.png" 
+        id="profile-pic" 
+        alt="Mallex Shipanga" 
+        width="150" 
+        height="150" 
+        decoding="async" 
+        loading="eager"
+      >
       <div class="about-text">
         <h1>Meet The Creative</h1>
         <p>
@@ -64,7 +57,7 @@
 
     <section id="projects">
       <h2>The Creative Projects</h2>
-      <div id="projectList" class="projects-grid"></div>
+      <div id="projectList"></div>
     </section>
   </main>
 
@@ -76,7 +69,6 @@
         <button id="closeModalBtn" class="close-btn" aria-label="Close modal">&times;</button>
       </div>
       <div class="modal-body">
-        <div id="modalLoading" class="modal-loading">Loading PDF...</div>
         <canvas id="modalPdfCanvas"></canvas>
       </div>
       <div class="modal-footer">
@@ -87,5 +79,6 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </body>
 </html>
