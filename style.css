@@ -1,3 +1,7 @@
+html {
+  scroll-behavior: smooth;
+}
+
 html, body { 
   height: 100%; 
   margin: 0; 
@@ -5,6 +9,7 @@ html, body {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 500;
   color: #000;
+  cursor: none;
 }
 
 h1, h2, h3 {
@@ -16,6 +21,7 @@ p {
   line-height: 1.5;
 }
 
+/* ---------- Page-load fade-in ---------- */
 #content-wrapper {
   max-width: 1400px;
   margin: 0 auto;
@@ -23,13 +29,35 @@ p {
   display: flex;
   flex-direction: column;
   gap: 60px;
+  opacity: 0;
+  animation: pageFadeIn 0.9s ease forwards;
 }
 
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Cards ---------- */
 .black-card {
+  position: relative;
   background: #000;
   color: #fff;
   border-radius: 16px;
   padding: 32px;
+  overflow: hidden;
+}
+
+/* Grain / noise texture overlay on all black cards */
+.black-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
 }
 
 #about-card {
@@ -60,7 +88,20 @@ p {
   gap: 40px;
 }
 
+/* ---------- Scroll-in reveal ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .project-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -68,14 +109,36 @@ p {
   color: #fff;
   border-radius: 16px;
   padding: 32px 40px;
+  overflow: hidden;
 }
 
+/* same grain treatment on project cards */
+.project-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
+}
+
+/* ---------- PDF viewer + hover effect ---------- */
 .project-card .viewer {
   position: relative;
   background: #fff;
   border-radius: 16px;
   overflow: hidden;
   min-height: 200px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.project-card .viewer:hover,
+.project-card .viewer:active,
+.project-card .viewer.touch-active {
+  transform: scale(1.015);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
 }
 
 .project-card .viewer canvas {
@@ -109,7 +172,7 @@ p {
   border: none;
   border-radius: 8px;
   padding: 6px 14px;
-  cursor: pointer;
+  cursor: none;
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
   font-size: 1rem;
@@ -117,7 +180,6 @@ p {
 
 .pdf-controls button:disabled {
   opacity: 0.3;
-  cursor: default;
 }
 
 .pdf-controls span {
@@ -135,6 +197,71 @@ p {
 
 .description p {
   font-weight: 400;
+}
+
+/* ---------- Custom cursor (desktop) ---------- */
+#custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  margin-left: -9px;
+  margin-top: -9px;
+  border-radius: 50%;
+  background: #000;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transition: transform 0.15s ease, opacity 0.2s ease, width 0.2s ease, height 0.2s ease, margin 0.2s ease;
+}
+
+#custom-cursor.cursor-hover {
+  width: 40px;
+  height: 40px;
+  margin-left: -20px;
+  margin-top: -20px;
+  background: #fff;
+}
+
+#custom-cursor.cursor-active {
+  transform: scale(0.75);
+}
+
+/* Hide custom cursor on touch-only devices so it never renders as a stray dot */
+@media (pointer: coarse) {
+  #custom-cursor { display: none; }
+  html, body, .pdf-controls button { cursor: auto; }
+}
+
+/* ---------- Tap ripple (mobile equivalent of custom cursor) ---------- */
+.tap-ripple {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  margin-left: -10px;
+  margin-top: -10px;
+  border-radius: 50%;
+  border: 2px solid #000;
+  pointer-events: none;
+  z-index: 9999;
+  animation: rippleOut 0.5s ease-out forwards;
+}
+
+@keyframes rippleOut {
+  from { transform: scale(0.4); opacity: 0.8; }
+  to   { transform: scale(2.2); opacity: 0; }
+}
+
+/* ---------- Respect reduced-motion preference ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  #content-wrapper { opacity: 1; animation: none; transform: none; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .project-card .viewer:hover,
+  .project-card .viewer:active { transform: none; }
+  .tap-ripple { display: none; }
 }
 
 @media (max-width: 800px) {
