@@ -5,56 +5,37 @@ html, body { height: 100%; margin: 0; background: #fff; }
 #controls {
   position: fixed; bottom: 20px; left: 0; right: 0;
   display: flex; justify-content: center;
-  z-index: 5;
+  z-index: 5; /* Keep above canvas */
 }
-
-/* Removed card background and border-radius */
 #controls .card {
   display: flex; align-items: center; gap: 16px;
-  background: transparent; 
-  color: #000;
+  background: #000; color: #fff;
+  border-radius: 16px;
+  padding: 12px 20px;
   font-family: Arial, sans-serif;
-  font-size: 1.2rem;
-  font-weight: bold;
-  text-shadow: 0px 0px 8px rgba(255, 255, 255, 0.9); /* Adds readability over images */
 }
-
-/* Removed button borders and backgrounds */
 #controls button {
-  background: transparent; 
-  color: #000; 
-  border: none; 
-  padding: 8px 14px; 
-  cursor: pointer; 
-  font-family: 'Ranchers', sans-serif;
-  font-size: 1.5rem;
-  letter-spacing: 1px;
-  text-shadow: 0px 0px 8px rgba(255, 255, 255, 0.9);
-  transition: transform 0.2s;
+  background: #000; color: #fff; border: 1px solid #333; border-radius: 8px;
+  padding: 8px 14px; cursor: pointer; font-family: Arial, sans-serif;
 }
-
 #controls button:hover {
-  transform: scale(1.1); /* Added scale on hover instead of background color */
+  background: #222;
 }
 
-/* White background section */
 #projects {
-  position: relative;
-  z-index: 10;
-  background: #fff; 
+  position: relative; /* Added to establish stacking context */
+  z-index: 10; /* Scroll ON TOP of the fixed canvas */
+  background: #fff; /* Solid background hides the canvas when scrolled into view */
   margin-top: 100vh;
   padding: 60px 40px 100px;
 }
 
 #projects h2 {
-  color: #000;
-  font-family: 'Ranchers', sans-serif;
-  font-size: 3rem;
+  color: #000; /* Fixed: Changed from #fff so it shows up on white background */
+  font-family: 'Lemonada', Arial, sans-serif;
   margin: 0 0 24px;
-  letter-spacing: 2px;
 }
 
-/* Black project cards */
 .project-card {
   display: flex; gap: 24px;
   background: #000;
@@ -72,20 +53,17 @@ html, body { height: 100%; margin: 0; background: #fff; }
   height: 600px;
   border: none;
   border-radius: 8px;
-  background: #fff; 
+  background: #fff; /* Added in case the PDF takes a second to load */
 }
 
-/* White text on black cards */
 .project-card .description {
   flex: 1 1 45%;
   font-family: Arial, sans-serif;
-  color: #fff; 
+  color: #fff; /* Fixed: Changed from #000 so it shows up on black card background */
 }
 .project-card .description h3 {
   margin-top: 0;
-  font-family: 'Ranchers', sans-serif;
-  font-size: 2rem;
-  letter-spacing: 1.5px;
+  font-family: 'Lemonada', Arial, sans-serif;
 }
 .project-card .description p {
   line-height: 1.5;
