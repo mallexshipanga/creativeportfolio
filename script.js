@@ -5,9 +5,9 @@ if (typeof pdfjsLib !== 'undefined') {
 const defaultPortfolioData = {
   "projects": [
     {
-      "file": "creativeprojects/Campus_Couture.pdf",
+      "file": "creativeprojects/Campus%20Couture.pdf",
       "title": "Campus Couture: Thematic Photoessay",
-      "description": "This is a thematic photoessay I created in May 2025. The photoessay features three diverse university students’ fashion, exploring how each student uses clothing to express themselves."
+      "description": "This is a thematic photoessay I created in May 2025. The photoessay features three diverse university students' fashion, exploring how each student uses clothing to express themselves."
     },
     {
       "file": "creativeprojects/Sunflowers.pdf",
@@ -19,6 +19,7 @@ const defaultPortfolioData = {
 
 const state = {
   data: defaultPortfolioData,
+  currentProjectIndex: 0,
   modal: {
     pdfDoc: null,
     currentPage: 1,
@@ -102,8 +103,11 @@ function initProjects() {
         <h3>${escapeHtml(proj.title)}</h3>
         <p>${escapeHtml(proj.description)}</p>
         <div class="project-actions">
-          <button class="btn-primary view-btn" data-file="${proj.file}" data-title="${escapeHtml(proj.title)}">
-            View PDF
+          <button class="btn-secondary prev-btn" data-index="${idx}" ${idx === 0 ? 'disabled' : ''}>
+            Previous
+          </button>
+          <button class="btn-secondary next-btn" data-index="${idx}" ${idx === projects.length - 1 ? 'disabled' : ''}>
+            Next
           </button>
         </div>
       </div>
@@ -119,12 +123,28 @@ function initProjects() {
       openModal(proj.file, proj.title);
     });
 
-    const viewBtn = card.querySelector('.view-btn');
-    viewBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openModal(proj.file, proj.title);
+    const prevBtn = card.querySelector('.prev-btn');
+    const nextBtn = card.querySelector('.next-btn');
+
+    prevBtn.addEventListener('click', () => {
+      if (idx > 0) {
+        scrollToProject(idx - 1);
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (idx < projects.length - 1) {
+        scrollToProject(idx + 1);
+      }
     });
   });
+}
+
+function scrollToProject(index) {
+  const projects = document.querySelectorAll('.project-card');
+  if (projects[index]) {
+    projects[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 function initModalListeners() {
