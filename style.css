@@ -100,6 +100,11 @@ p {
   transition: transform 0.15s ease-out;
   will-change: transform;
   -webkit-tap-highlight-color: transparent;
+  margin-bottom: 32px;
+}
+
+.project-card:last-child {
+  margin-bottom: 0;
 }
 
 .reveal {
