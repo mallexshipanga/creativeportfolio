@@ -79,7 +79,7 @@
     flex-direction: column;
     text-align: center;
   }
-  .project-row {
-    flex-direction: column;
+  .project-card {
+    padding: 16px;
   }
 }
