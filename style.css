@@ -1,75 +1,160 @@
-html, body { height: 100%; margin: 0; background: #fff; }
-#stage { position: fixed; inset: 0; z-index: 1; }
-#stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-
-#controls {
-  position: fixed; bottom: 20px; left: 0; right: 0;
-  display: flex; justify-content: center;
-  z-index: 5; /* Keep above canvas */
+html, body { 
+  height: 100%; 
+  margin: 0; 
+  background: #fff; 
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  color: #000;
 }
-#controls .card {
-  display: flex; align-items: center; gap: 16px;
-  background: #000; color: #fff;
+
+h1, h2, h3 {
+  text-decoration: underline;
+}
+
+p {
+  text-align: justify;
+  line-height: 1.6;
+}
+
+#content-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 60px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+.black-card {
+  background: #000;
+  color: #fff;
   border-radius: 16px;
-  padding: 12px 20px;
-  font-family: Arial, sans-serif;
-}
-#controls button {
-  background: #000; color: #fff; border: 1px solid #333; border-radius: 8px;
-  padding: 8px 14px; cursor: pointer; font-family: Arial, sans-serif;
-}
-#controls button:hover {
-  background: #222;
+  padding: 32px;
 }
 
-#projects {
-  position: relative; /* Added to establish stacking context */
-  z-index: 10; /* Scroll ON TOP of the fixed canvas */
-  background: #fff; /* Solid background hides the canvas when scrolled into view */
-  margin-top: 100vh;
-  padding: 60px 40px 100px;
+#about-card {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+#profile-pic {
+  width: 150px;
+  height: 150px;
+  border-radius: 16px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.about-text h1 {
+  margin-top: 0;
 }
 
 #projects h2 {
-  color: #000; /* Fixed: Changed from #fff so it shows up on white background */
-  font-family: 'Lemonada', Arial, sans-serif;
-  margin: 0 0 24px;
+  margin-top: 0;
+}
+
+#projectList {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
 }
 
 .project-card {
-  display: flex; gap: 24px;
+  display: flex; 
+  gap: 24px;
   background: #000;
   border-radius: 16px;
   padding: 24px;
-  max-width: 1100px;
-  margin: 0 auto;
+  color: #fff;
 }
+
 .project-card .viewer {
   flex: 1 1 55%;
   min-width: 0;
 }
+
 .project-card .viewer iframe {
   width: 100%;
   height: 600px;
   border: none;
   border-radius: 8px;
-  background: #fff; /* Added in case the PDF takes a second to load */
+  background: #fff; 
 }
 
 .project-card .description {
   flex: 1 1 45%;
-  font-family: Arial, sans-serif;
-  color: #fff; /* Fixed: Changed from #000 so it shows up on black card background */
 }
+
 .project-card .description h3 {
   margin-top: 0;
-  font-family: 'Lemonada', Arial, sans-serif;
 }
-.project-card .description p {
-  line-height: 1.5;
+
+#stage-container {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+}
+
+#stage { 
+  position: relative; 
+  width: 100%; 
+  height: 100%; 
+  background: #fff;
+}
+
+#stage canvas { 
+  position: absolute; 
+  inset: 0; 
+  width: 100%; 
+  height: 100%; 
+}
+
+#controls {
+  position: absolute; 
+  bottom: 40px; 
+  left: 0; 
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+#controls button, #controls span {
+  pointer-events: auto;
+}
+
+#controls span {
+  color: #000;
+  font-size: 1.2rem;
+}
+
+#controls button {
+  background: transparent; 
+  color: #000; 
+  border: none; 
+  padding: 8px 14px; 
+  cursor: pointer; 
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
 @media (max-width: 800px) {
-  .project-card { flex-direction: column; }
-  .project-card .viewer iframe { height: 400px; }
+  #about-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  .project-card { 
+    flex-direction: column; 
+  }
+  .project-card .viewer iframe { 
+    height: 400px; 
+  }
+  #controls {
+    padding: 0 20px;
+  }
 }
