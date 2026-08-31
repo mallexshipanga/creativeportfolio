@@ -1,4 +1,4 @@
- let pdfReady = false;
+let pdfReady = false;
 try {
   pdfjsLib.GlobalWorkerOptions.workerSrc =
     "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -114,10 +114,13 @@ function attachShareButtons() {
       shareBtn.innerHTML = shareIconSvg;
       shareBtn.addEventListener('click', () => {
         const title = card.querySelector('h3').textContent;
+        const projectFile = card.dataset.file;
+        const projectUrl = new URL(projectFile, window.location.href).href;
+
         if (navigator.share) {
-          navigator.share({ title: title, url: window.location.href }).catch(() => {});
+          navigator.share({ title: title, url: projectUrl }).catch(() => {});
         } else {
-          navigator.clipboard.writeText(window.location.href);
+          navigator.clipboard.writeText(projectUrl);
           shareBtn.innerHTML = checkIconSvg;
           setTimeout(() => { shareBtn.innerHTML = shareIconSvg; }, 2000);
         }
@@ -127,11 +130,30 @@ function attachShareButtons() {
   });
 }
 
+function attachTiltEffect(card) {
+  card.addEventListener('mousemove', (e) => {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -8;
+    const rotateY = ((x - centerX) / centerX) * 8;
+
+    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
+  });
+
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+  });
+}
+
 function renderProjects(projects) {
   projectList.innerHTML = '';
   projects.forEach((p) => {
     const card = document.createElement('div');
     card.className = 'project-card reveal';
+    card.dataset.file = p.file;
     card.innerHTML = `
       <div class="viewer">
         <canvas class="pdf-canvas"></canvas>
@@ -150,6 +172,7 @@ function renderProjects(projects) {
     projectList.appendChild(card);
     setupPdfViewer(card.querySelector('.viewer'), p.file);
     revealObserver.observe(card);
+    attachTiltEffect(card);
   });
   attachShareButtons();
 }
@@ -164,22 +187,3 @@ fetch('creativeprojects.json')
     }
   })
   .catch((e) => console.error("Failed to load creativeprojects.json:", e));
-
-document.querySelectorAll('.project-card').forEach((card) => {
-  card.addEventListener('mousemove', (e) => {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -8;
-    const rotateY = ((x - centerX) / centerX) * 8;
-
-    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
-  });
-
-  card.addEventListener('mouseleave', () => {
-    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-  });
-});
-
