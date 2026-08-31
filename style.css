@@ -10,15 +10,18 @@ html, body {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 500;
   color: #000;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 h1, h2, h3 {
   font-weight: 700;
+  text-align: left;
 }
 
 p {
   text-align: justify;
-  text-justify: inter-word; /* Improves word-spacing distribution in modern browsers */
+  text-justify: inter-word;
   line-height: 1.5;
 }
 
@@ -45,6 +48,7 @@ p {
   border-radius: 16px;
   padding: 32px;
   overflow: hidden;
+  text-align: justify;
 }
 
 .black-card::after {
@@ -65,7 +69,7 @@ p {
 }
 
 .about-text {
-  text-align: justify; /* Justifies any text blocks within the about section */
+  text-align: justify;
 }
 
 #profile-pic {
@@ -80,6 +84,7 @@ p {
 #skills-card h2,
 #projects h2 {
   margin-top: 0;
+  text-align: left;
 }
 
 .skills-list {
@@ -89,6 +94,7 @@ p {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  text-align: left;
 }
 
 #projectList {
@@ -107,7 +113,7 @@ p {
   border-radius: 16px;
   padding: 32px 40px;
   overflow: hidden;
-  text-align: justify; /* Ensures text inside project cards is justified */
+  text-align: justify;
 }
 
 .project-preview-wrapper {
@@ -169,6 +175,7 @@ p {
   align-items: center;
   justify-content: center;
   transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+  text-align: center;
 }
 
 .btn-primary {
@@ -196,7 +203,6 @@ p {
   cursor: not-allowed;
 }
 
-/* PDF Modal Styling */
 .modal {
   position: fixed;
   inset: 0;
@@ -300,7 +306,7 @@ p {
     text-align: center;
   }
   p, .about-text, .project-card {
-    text-align: left; /* Reverts text back to left-aligned on smaller devices to prevent awkward spacing */
+    text-align: left; 
   }
   .project-card {
     padding: 20px;
