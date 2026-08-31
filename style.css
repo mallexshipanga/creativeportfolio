@@ -184,7 +184,20 @@ p {
 }
 
 .project-actions {
-  display: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.page-indicator {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  min-width: 100px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
 .btn-primary, .btn-secondary {
@@ -214,6 +227,11 @@ p {
 .btn-secondary {
   background: rgba(255, 255, 255, 0.15);
   color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 1.2rem;
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -224,10 +242,6 @@ p {
 .btn-secondary:disabled {
   opacity: 0.3;
   cursor: not-allowed;
-}
-
-.page-indicator {
-  display: none;
 }
 
 .modal {
@@ -310,21 +324,12 @@ p {
   min-height: 300px;
   background: #111;
   border-radius: 8px;
-  margin-bottom: 16px;
 }
 
 #modalPdfCanvas {
   max-width: 100%;
   max-height: 100%;
   display: block;
-}
-
-.modal-footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
 }
 
 @media (max-width: 768px) {
@@ -361,6 +366,5 @@ p {
 
   .modal-body {
     min-height: 250px;
-    margin-bottom: 12px;
   }
 }
