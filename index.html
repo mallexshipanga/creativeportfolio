@@ -3,40 +3,99 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mallex Shipanga</title>
+  <title>Mallex Shipanga — Creative Portfolio</title>
+
+  <!-- PDF.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<main id="content-wrapper">
-  <section id="about-card" class="black-card">
-    <img src="https://github.com/mallexshipanga.png" id="profile-pic" alt="Mallex Shipanga">
-    <div class="about-text">
-      <h1>Meet The Creative</h1>
-      <p>I am a creative, media student, and saleswoman with experience in the communication and sales industries. Each of my creative projects uses photography, videography, and/or writing because I feel like communication is the bridge between an idea and a community. This creative portfolio exists to showcase some of my best creative work.</p>
+  <!-- Main Container -->
+  <main id="content-wrapper">
+
+    <!-- About Section Card -->
+    <section id="about-card" class="black-card">
+      <div class="profile-container">
+        <img src="https://github.com/mallexshipanga.png" id="profile-pic" alt="Mallex Shipanga">
+      </div>
+      <div class="about-text">
+        <h1>Meet The Creative</h1>
+        <p>
+          I am a creative, media student, and saleswoman with experience in the communication and sales industries. 
+          Each of my creative projects uses photography, videography, and/or writing because I feel like communication 
+          is the bridge between an idea and a community. This creative portfolio exists to showcase some of my best creative work.
+        </p>
+      </div>
+    </section>
+
+    <!-- Interactive Hero Slideshow -->
+    <section id="slideshow-section" class="black-card">
+      <h2>Featured Works</h2>
+      <div class="slideshow-container">
+        <div id="slides-wrapper" class="slides-wrapper">
+          <!-- Dynamically populated with PDF slide canvases -->
+        </div>
+        <button class="slide-nav prev" id="prevSlideBtn" aria-label="Previous Slide">&#10094;</button>
+        <button class="slide-nav next" id="nextSlideBtn" aria-label="Next Slide">&#10095;</button>
+        <div id="slideshow-dots" class="slideshow-dots"></div>
+      </div>
+    </section>
+
+    <!-- Skills Section Card -->
+    <section id="skills-card" class="black-card">
+      <h2>The Creative Skills</h2>
+      <ul class="skills-list">
+        <li><strong>★ Graphic Design:</strong> Canva, Illustrator, InDesign, Photoshop</li>
+        <li><strong>★ Photography & Videography:</strong> DSLR Camera, MILC Camera, Mobile Camera</li>
+        <li><strong>★ Photo & Video Editing:</strong> CapCut, DaVinci Resolve, Lightroom</li>
+        <li><strong>★ Writing:</strong> Features, News, Social Media Content</li>
+      </ul>
+    </section>
+
+    <!-- Creative Projects Section -->
+    <section id="projects">
+      <h2>The Creative Projects</h2>
+      <div id="projectList" class="projects-grid">
+        <!-- Dynamically rendered project cards -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- PDF Reader Modal -->
+  <div id="pdfModal" class="modal" aria-hidden="true">
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="modal-content black-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Project Viewer</h3>
+        <button id="closeModalBtn" class="close-btn" aria-label="Close Modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="pdf-viewer-container">
+          <canvas id="modalPdfCanvas"></canvas>
+          <div id="modalLoading" class="loading-spinner">Loading PDF...</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="pdf-controls">
+          <button id="modalPrevPage" class="btn-ctrl">← Previous</button>
+          <span id="modalPageNum">Page 1 of 1</span>
+          <button id="modalNextPage" class="btn-ctrl">Next →</button>
+        </div>
+        <a id="modalDownloadBtn" href="#" target="_blank" rel="noopener" class="btn-download">Open PDF File ↗</a>
+      </div>
     </div>
-  </section>
+  </div>
 
-  <section id="skills-card" class="black-card">
-    <h2>The Creative Skills</h2>
-    <ul style="list-style: none; padding: 0; margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
-      <li><strong>★ Graphic Design:</strong> Canva, Illustrator, InDesign, Photoshop</li>
-      <li><strong>★ Photography and Videography:</strong> DSLR Camera, MILC Camera, Mobile Camera</li>
-      <li><strong>★ Photo and Video Editing:</strong> CapCut, DaVinci Resolve, Lightroom</li>
-      <li><strong>★ Writing:</strong> Features, News, Social Media Content</li>
-    </ul>
-  </section>
-
-  <section id="projects">
-    <h2>The Creative Projects</h2>
-    <div id="projectList"></div>
-  </section>
-</main>
-
-<script src="script.js"></script>
+  <!-- Main JavaScript File -->
+  <script src="script.js"></script>
 </body>
 </html>
