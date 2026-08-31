@@ -1,5 +1,6 @@
 html {
   scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html, body { 
@@ -9,7 +10,6 @@ html, body {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 500;
   color: #000;
-  cursor: none;
 }
 
 h1, h2, h3 {
@@ -79,14 +79,26 @@ p {
   margin-top: 0;
 }
 
+/* 3D Card Parent Container */
 #projectList {
   perspective: 1000px;
 }
 
+/* 3D Card Properties */
 .project-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: #000;
+  color: #fff;
+  border-radius: 16px;
+  padding: 32px 40px;
+  overflow: hidden;
   transform-style: preserve-3d;
   transition: transform 0.15s ease-out;
   will-change: transform;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .reveal {
@@ -98,18 +110,6 @@ p {
 .reveal.in-view {
   opacity: 1;
   transform: translateY(0);
-}
-
-.project-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  background: #000;
-  color: #fff;
-  border-radius: 16px;
-  padding: 32px 40px;
-  overflow: hidden;
 }
 
 .project-card::after {
@@ -130,13 +130,6 @@ p {
   overflow: hidden;
   min-height: 200px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.project-card .viewer:hover,
-.project-card .viewer:active,
-.project-card .viewer.touch-active {
-  transform: scale(1.015);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
 }
 
 .project-card .viewer canvas {
@@ -170,14 +163,16 @@ p {
   border: none;
   border-radius: 8px;
   padding: 6px 14px;
-  cursor: none;
+  cursor: pointer;
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
   font-size: 1rem;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .pdf-controls button:disabled {
   opacity: 0.3;
+  cursor: default;
 }
 
 .pdf-controls span {
@@ -197,65 +192,11 @@ p {
   font-weight: 400;
 }
 
-#custom-cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 18px;
-  height: 18px;
-  margin-left: -9px;
-  margin-top: -9px;
-  border-radius: 50%;
-  background: #000;
-  mix-blend-mode: difference;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0;
-  transition: transform 0.15s ease, opacity 0.2s ease, width 0.2s ease, height 0.2s ease, margin 0.2s ease;
-}
-
-#custom-cursor.cursor-hover {
-  width: 40px;
-  height: 40px;
-  margin-left: -20px;
-  margin-top: -20px;
-  background: #fff;
-}
-
-#custom-cursor.cursor-active {
-  transform: scale(0.75);
-}
-
-@media (pointer: coarse) {
-  #custom-cursor { display: none; }
-  html, body, .pdf-controls button { cursor: auto; }
-}
-
-.tap-ripple {
-  position: fixed;
-  width: 20px;
-  height: 20px;
-  margin-left: -10px;
-  margin-top: -10px;
-  border-radius: 50%;
-  border: 2px solid #000;
-  pointer-events: none;
-  z-index: 9999;
-  animation: rippleOut 0.5s ease-out forwards;
-}
-
-@keyframes rippleOut {
-  from { transform: scale(0.4); opacity: 0.8; }
-  to   { transform: scale(2.2); opacity: 0; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   #content-wrapper { opacity: 1; animation: none; transform: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
-  .project-card .viewer:hover,
-  .project-card .viewer:active { transform: none; }
-  .tap-ripple { display: none; }
+  .project-card { transform: none !important; }
 }
 
 @media (max-width: 800px) {
