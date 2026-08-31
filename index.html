@@ -5,26 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Photography</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
-<style>
-  html, body { height: 100%; margin: 0; background: #000; }
-  #stage { position: fixed; inset: 0; }
-  #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-  #controls {
-    position: fixed; bottom: 20px; left: 0; right: 0;
-    display: flex; justify-content: center;
-  }
-  #controls .card {
-    display: flex; align-items: center; gap: 16px;
-    background: #fff; color: #000;
-    border-radius: 16px;
-    padding: 12px 20px;
-    font-family: Arial, sans-serif;
-  }
-  #controls button {
-    background: #000; color: #fff; border: none; border-radius: 8px;
-    padding: 8px 14px; cursor: pointer; font-family: Arial, sans-serif;
-  }
-</style>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -39,6 +20,24 @@
     <button id="next">Next</button>
   </div>
 </div>
+
+<section id="projects">
+  <h2>Projects</h2>
+  <div class="project-card">
+    <div class="viewer">
+      <iframe src="photos/campus-couture.pdf" title="Campus Couture photo essay"></iframe>
+    </div>
+    <div class="description">
+      <h3>Campus Couture: Thematic Photoessay on Student Fashion</h3>
+
+      <p>
+        This is a thematic photoessay I created in 2025. The thematic photoessay 
+        features three diverse university students’ fashion, exploring how each
+        student uses clothing to express who they are.
+      </p>
+    </div>
+  </div>
+</section>
 
 <script>
   // List your PDFs here, in order. Put the files in a /photos folder.
