@@ -1,33 +1,38 @@
-html, body { height: 100%; margin: 0; background: #fff; scroll-behavior: smooth; }
-
-/* Changed to relative to fix document flow so projects are visible below it */
-#stage { 
-  position: relative; 
-  width: 100%; 
-  height: 100vh; 
-  overflow: hidden; 
-  background: #fff;
-}
-#stage canvas { 
-  position: absolute; 
-  inset: 0; 
-  width: 100%; 
-  height: 100%; 
-}
-
-/* Controls spaced far apart at the bottom of the canvas */
+/* Container spans the whole width */
 #controls {
   position: absolute; 
   bottom: 40px; 
-  left: 40px; 
-  right: 40px;
-  display: flex; 
-  justify-content: space-between; /* Pushes Prev and Next to the edges */
-  align-items: center;
+  left: 0; 
+  right: 0;
+  height: 40px;
   z-index: 5;
+  pointer-events: none; /* Allows you to click the canvas in the empty space between buttons */
 }
 
-#controls span {
+/* Forces Prev to the far left edge */
+#controls #prev {
+  position: absolute;
+  left: 40px;
+  top: 0;
+  pointer-events: auto; /* Makes the button clickable */
+}
+
+/* Forces Next to the far right edge */
+#controls #next {
+  position: absolute;
+  right: 40px;
+  top: 0;
+  pointer-events: auto;
+}
+
+/* Pins the count perfectly in the center */
+#controls #count {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 8px; /* Slight adjustment to align with button text */
+  pointer-events: auto;
+  
   color: #000;
   font-family: Arial, sans-serif;
   font-size: 1.2rem;
@@ -35,6 +40,7 @@ html, body { height: 100%; margin: 0; background: #fff; scroll-behavior: smooth;
   text-shadow: 0px 0px 8px rgba(255, 255, 255, 0.9);
 }
 
+/* Shared styling for both buttons */
 #controls button {
   background: transparent; 
   color: #000; 
@@ -52,75 +58,8 @@ html, body { height: 100%; margin: 0; background: #fff; scroll-behavior: smooth;
   transform: scale(1.1);
 }
 
-/* Section styling with guaranteed black text on white background */
-#projects {
-  background: #fff; 
-  color: #000;
-  padding: 60px 40px 100px;
-}
-
-#projects h2 {
-  color: #000;
-  font-family: 'Ranchers', sans-serif;
-  font-size: 3rem;
-  margin: 0 0 24px;
-  letter-spacing: 2px;
-}
-
-/* Horizontal slideable carousel for projects */
-#projectList {
-  display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory; /* Snaps to each card as you scroll horizontally */
-  gap: 40px;
-  padding-bottom: 20px;
-  scrollbar-width: thin;
-}
-
-.project-card {
-  flex: 0 0 100%; /* Forces cards to take up the full container width */
-  scroll-snap-align: center;
-  display: flex; gap: 24px;
-  background: #000;
-  border-radius: 16px;
-  padding: 24px;
-  max-width: 1100px;
-  margin: 0 auto;
-  box-sizing: border-box;
-}
-
-.project-card .viewer {
-  flex: 1 1 55%;
-  min-width: 0;
-}
-
-.project-card .viewer iframe {
-  width: 100%;
-  height: 600px;
-  border: none;
-  border-radius: 8px;
-  background: #fff; 
-}
-
-/* White text strictly inside the black cards */
-.project-card .description {
-  flex: 1 1 45%;
-  font-family: Arial, sans-serif;
-  color: #fff; 
-}
-.project-card .description h3 {
-  margin-top: 0;
-  font-family: 'Ranchers', sans-serif;
-  font-size: 2rem;
-  letter-spacing: 1.5px;
-}
-.project-card .description p {
-  line-height: 1.5;
-}
-
 @media (max-width: 800px) {
-  .project-card { flex-direction: column; }
-  .project-card .viewer iframe { height: 400px; }
-  
-  #controls { left: 20px; right: 20px; bottom: 20px; }
+  /* Keep them slightly closer to edges on mobile phones */
+  #controls #prev { left: 10px; }
+  #controls #next { right: 10px; }
 }
