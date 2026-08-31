@@ -11,12 +11,18 @@
   #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
   #controls {
     position: fixed; bottom: 20px; left: 0; right: 0;
-    display: flex; justify-content: center; gap: 16px;
-    font-family: sans-serif; color: #fff;
+    display: flex; justify-content: center;
+  }
+  #controls .card {
+    display: flex; align-items: center; gap: 16px;
+    background: #fff; color: #000;
+    border-radius: 16px;
+    padding: 12px 20px;
+    font-family: Arial, sans-serif;
   }
   #controls button {
-    background: rgba(0,0,0,.5); color: #fff; border: 1px solid #fff;
-    padding: 8px 14px; cursor: pointer;
+    background: #000; color: #fff; border: none; border-radius: 8px;
+    padding: 8px 14px; cursor: pointer; font-family: Arial, sans-serif;
   }
 </style>
 </head>
@@ -27,9 +33,11 @@
 </div>
 
 <div id="controls">
-  <button id="prev">Prev</button>
-  <span id="count"></span>
-  <button id="next">Next</button>
+  <div class="card">
+    <button id="prev">Prev</button>
+    <span id="count"></span>
+    <button id="next">Next</button>
+  </div>
 </div>
 
 <script>
@@ -83,4 +91,3 @@
 </script>
 </body>
 </html>
-
