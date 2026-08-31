@@ -1,4 +1,3 @@
-// Set CDN worker for PDF.js
 if (typeof pdfjsLib !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
@@ -68,8 +67,8 @@ async function initProjects() {
     card.className = 'project-card black-card';
 
     card.innerHTML = `
-      <div class="project-preview-wrapper" id="preview-wrapper-${idx}" style="position: relative; cursor: pointer; background: #111; border-radius: 8px; overflow: hidden;">
-        <canvas id="project-canvas-${idx}" class="project-canvas" style="width: 100%; height: auto; display: block; border-radius: 8px;"></canvas>
+      <div class="project-preview-wrapper" id="preview-wrapper-${idx}" style="cursor: pointer;">
+        <canvas id="project-canvas-${idx}" class="project-canvas"></canvas>
         <div class="preview-overlay">
           <span>Click to View Full Project</span>
         </div>
@@ -78,13 +77,9 @@ async function initProjects() {
         <h3>${escapeHtml(proj.title)}</h3>
         <p>${escapeHtml(proj.description)}</p>
         <div class="project-actions">
-          <button class="btn-secondary prev-btn" data-index="${idx}">
-            &lsaquo;
-          </button>
+          <button class="btn-secondary prev-btn" data-index="${idx}">&lsaquo;</button>
           <span class="page-indicator" id="page-indicator-${idx}">Loading PDF...</span>
-          <button class="btn-secondary next-btn" data-index="${idx}">
-            &rsaquo;
-          </button>
+          <button class="btn-secondary next-btn" data-index="${idx}">&rsaquo;</button>
         </div>
       </div>
     `;
@@ -149,12 +144,10 @@ async function renderProjectCanvas(idx, pageNum) {
     canvas.height = viewport.height;
     canvas.width = viewport.width;
 
-    const renderContext = {
+    await page.render({
       canvasContext: context,
       viewport: viewport
-    };
-
-    await page.render(renderContext).promise;
+    }).promise;
 
     if (indicatorEl) {
       indicatorEl.textContent = `Page ${pageNum} of ${pdfDoc.numPages}`;
@@ -207,7 +200,6 @@ function openModal(project, idx, initialPage = 1) {
   state.modal.pdfDoc = state.pdfDocs[idx];
   state.modal.currentPage = initialPage;
   state.modal.numPages = state.numPages[idx];
-  state.modal.title = project.title;
 
   if (modalTitle) modalTitle.textContent = project.title;
   modal.setAttribute('aria-hidden', 'false');
@@ -225,7 +217,7 @@ async function renderModalCanvas() {
   const modalBody = document.querySelector('.modal-body');
 
   if (!modalBody) return;
-  modalBody.innerHTML = '<canvas id="modalPdfCanvas" style="max-width:100%; max-height:75vh; display:block; margin:0 auto; border-radius:8px;"></canvas>';
+  modalBody.innerHTML = '<canvas id="modalPdfCanvas"></canvas>';
   
   const canvas = document.getElementById('modalPdfCanvas');
 
@@ -237,12 +229,10 @@ async function renderModalCanvas() {
     canvas.height = viewport.height;
     canvas.width = viewport.width;
 
-    const renderContext = {
+    await page.render({
       canvasContext: context,
       viewport: viewport
-    };
-
-    await page.render(renderContext).promise;
+    }).promise;
 
     if (pageNumDisplay) {
       pageNumDisplay.textContent = `Page ${pageNum} of ${state.modal.numPages}`;
