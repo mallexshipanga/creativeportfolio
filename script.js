@@ -21,6 +21,13 @@ const defaultPortfolioData = {
       title: 'Flower Boy: Editorial Photoshoot',
       description:
         'This is an editorial photoshoot I captured and edited in August 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media.'
+    },
+    {
+      type: 'video',
+      file: 'creativeprojects/Cooking With Paulo.mp4',
+      title: 'Cooking With Paulo: Mock Episode',
+      description:
+        'This is a mock episode I produced with three fellow media students in April, 2025. The mock episode is a cooking show parody used for academic purposes.'
     }
   ]
 };
@@ -30,7 +37,7 @@ const state = {
   pdfDocs: {},
   currentPages: {},
   numPages: {},
-  renderTasks: {}, // Track active render tasks to cancel overlaps
+  renderTasks: {},
   modal: {
     pdfDoc: null,
     title: '',
@@ -63,56 +70,77 @@ async function initProjects() {
   projectListContainer.innerHTML = '';
 
   projects.forEach((proj, idx) => {
-    state.currentPages[idx] = 1;
-
     const card = document.createElement('article');
     card.className = 'project-card black-card';
 
-    card.innerHTML = `
-      <div class="project-preview-wrapper" id="preview-wrapper-${idx}" style="cursor: pointer;">
-        <canvas id="project-canvas-${idx}" class="project-canvas"></canvas>
-        <div class="preview-overlay">
-          <span>Click to View Full Project</span>
+    const isVideo = proj.type === 'video';
+
+    if (isVideo) {
+      card.innerHTML = `
+        <div class="project-preview-wrapper video-preview-wrapper">
+          <video controls preload="metadata" class="project-video" width="100%">
+            <source src="${proj.file}" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
         </div>
-      </div>
-      <div class="project-info">
-        <h3 class="project-title"></h3>
-        <p class="project-desc"></p>
-        <div class="project-actions">
-          <button class="btn-secondary prev-btn" data-index="${idx}" aria-label="Previous Page">&lsaquo;</button>
-          <span class="page-indicator" id="page-indicator-${idx}">Loading PDF...</span>
-          <button class="btn-secondary next-btn" data-index="${idx}" aria-label="Next Page">&rsaquo;</button>
+        <div class="project-info">
+          <h3 class="project-title"></h3>
+          <p class="project-desc"></p>
         </div>
-      </div>
-    `;
+      `;
 
-    // Safely set text content without relying solely on string concatenation
-    card.querySelector('.project-title').textContent = proj.title;
-    card.querySelector('.project-desc').textContent = proj.description;
+      card.querySelector('.project-title').textContent = proj.title;
+      card.querySelector('.project-desc').textContent = proj.description;
 
-    projectListContainer.appendChild(card);
+      projectListContainer.appendChild(card);
+    } else {
+      state.currentPages[idx] = 1;
 
-    const previewWrapper = document.getElementById(`preview-wrapper-${idx}`);
-    previewWrapper.addEventListener('click', () => {
-      if (state.pdfDocs[idx]) {
-        openModal(proj, idx);
-      }
-    });
+      card.innerHTML = `
+        <div class="project-preview-wrapper" id="preview-wrapper-${idx}" style="cursor: pointer;">
+          <canvas id="project-canvas-${idx}" class="project-canvas"></canvas>
+          <div class="preview-overlay">
+            <span>Click to View Full Project</span>
+          </div>
+        </div>
+        <div class="project-info">
+          <h3 class="project-title"></h3>
+          <p class="project-desc"></p>
+          <div class="project-actions">
+            <button class="btn-secondary prev-btn" data-index="${idx}" aria-label="Previous Page">&lsaquo;</button>
+            <span class="page-indicator" id="page-indicator-${idx}">Loading PDF...</span>
+            <button class="btn-secondary next-btn" data-index="${idx}" aria-label="Next Page">&rsaquo;</button>
+          </div>
+        </div>
+      `;
 
-    const prevBtn = card.querySelector('.prev-btn');
-    const nextBtn = card.querySelector('.next-btn');
+      card.querySelector('.project-title').textContent = proj.title;
+      card.querySelector('.project-desc').textContent = proj.description;
 
-    prevBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      changePage(idx, -1);
-    });
+      projectListContainer.appendChild(card);
 
-    nextBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      changePage(idx, 1);
-    });
+      const previewWrapper = document.getElementById(`preview-wrapper-${idx}`);
+      previewWrapper.addEventListener('click', () => {
+        if (state.pdfDocs[idx]) {
+          openModal(proj, idx);
+        }
+      });
 
-    loadProjectPdf(idx, proj.file);
+      const prevBtn = card.querySelector('.prev-btn');
+      const nextBtn = card.querySelector('.next-btn');
+
+      prevBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        changePage(idx, -1);
+      });
+
+      nextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        changePage(idx, 1);
+      });
+
+      loadProjectPdf(idx, proj.file);
+    }
   });
 }
 
@@ -141,7 +169,6 @@ async function renderProjectCanvas(idx, pageNum) {
   const indicatorEl = document.getElementById(`page-indicator-${idx}`);
   if (!canvas) return;
 
-  // Cancel ongoing render task for this canvas if fast switching occurs
   if (state.renderTasks[idx]) {
     state.renderTasks[idx].cancel();
   }
