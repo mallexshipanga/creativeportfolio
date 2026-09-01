@@ -35,18 +35,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadData() {
   try {
-    const response = await fetch('data.json');
+    const response = await fetch('creativeprojects.json');
     if (response.ok) {
       state.data = await response.json();
+      console.log('✅ creativeprojects.json loaded successfully');
+      console.log('Projects found:', state.data.projects.length);
+    } else {
+      console.error('❌ creativeprojects.json not found (404)');
     }
   } catch (e) {
-    console.info('Using default portfolio data.');
+    console.error('❌ Error loading creativeprojects.json:', e);
   }
 }
 
 async function initProjects() {
   const projectListContainer = document.getElementById('projectList');
   const projects = state.data.projects || [];
+
+  console.log('Initializing', projects.length, 'projects');
 
   if (!projectListContainer) return;
   projectListContainer.innerHTML = '';
