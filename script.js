@@ -22,6 +22,7 @@ const defaultPortfolioData = {
       description:
         'This is an editorial photoshoot I captured and edited in August 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media.'
     }
+  ]
 };
 
 const state = {
@@ -33,7 +34,9 @@ const state = {
   modal: {
     pdfDoc: null,
     title: '',
-    renderTask: null
+    renderTask: null,
+    currentPage: 1,
+    numPages: 1
   }
 };
 
@@ -231,6 +234,8 @@ function openModal(project, idx) {
   const modalTitle = document.getElementById('modalTitle');
 
   state.modal.pdfDoc = state.pdfDocs[idx];
+  state.modal.currentPage = 1;
+  state.modal.numPages = state.pdfDocs[idx].numPages;
 
   if (modalTitle) modalTitle.textContent = project.title;
   modal.setAttribute('aria-hidden', 'false');
