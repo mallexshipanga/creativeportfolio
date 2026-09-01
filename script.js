@@ -1,23 +1,26 @@
 if (typeof pdfjsLib !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
 
 const defaultPortfolioData = {
-  "slideshow": [
-    "creativeprojects/01.pdf",
-    "creativeprojects/02.pdf",
-    "creativeprojects/03.pdf"
+  slideshow: [
+    'creativeprojects/01.pdf',
+    'creativeprojects/02.pdf',
+    'creativeprojects/03.pdf'
   ],
-  "projects": [
+  projects: [
     {
-      "file": "creativeprojects/Campus Couture.pdf",
-      "title": "Campus Couture: Thematic Photoessay",
-      "description": "This is a thematic photoessay I created in May 2025. The photoessay features three diverse university students' fashion, exploring how each student uses clothing to express themselves."
+      file: 'creativeprojects/Campus Couture.pdf',
+      title: 'Campus Couture: Thematic Photoessay',
+      description:
+        "This is a thematic photoessay I created in May 2025. The photoessay features three diverse university students' fashion, exploring how each student uses clothing to express themselves."
     },
     {
-      "file": "creativeprojects/Flower Boy.pdf",
-      "title": "Flower Boy: Editorial Photoshoot",
-      "description": "This is an editorial photoshoot I captured and edited in August 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media."
+      file: 'creativeprojects/Flower Boy.pdf',
+      title: 'Flower Boy: Editorial Photoshoot',
+      description:
+        'This is an editorial photoshoot I captured and edited in August 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media.'
     }
   ]
 };
@@ -27,9 +30,11 @@ const state = {
   pdfDocs: {},
   currentPages: {},
   numPages: {},
+  renderTasks: {}, // Track active render tasks to cancel overlaps
   modal: {
     pdfDoc: null,
-    title: ''
+    title: '',
+    renderTask: null
   }
 };
 
@@ -57,8 +62,7 @@ async function initProjects() {
   if (!projectListContainer) return;
   projectListContainer.innerHTML = '';
 
-  for (let idx = 0; idx < projects.length; idx++) {
-    const proj = projects[idx];
+  projects.forEach((proj, idx) => {
     state.currentPages[idx] = 1;
 
     const card = document.createElement('article');
@@ -72,15 +76,19 @@ async function initProjects() {
         </div>
       </div>
       <div class="project-info">
-        <h3>${escapeHtml(proj.title)}</h3>
-        <p>${escapeHtml(proj.description)}</p>
+        <h3 class="project-title"></h3>
+        <p class="project-desc"></p>
         <div class="project-actions">
-          <button class="btn-secondary prev-btn" data-index="${idx}">&lsaquo;</button>
+          <button class="btn-secondary prev-btn" data-index="${idx}" aria-label="Previous Page">&lsaquo;</button>
           <span class="page-indicator" id="page-indicator-${idx}">Loading PDF...</span>
-          <button class="btn-secondary next-btn" data-index="${idx}">&rsaquo;</button>
+          <button class="btn-secondary next-btn" data-index="${idx}" aria-label="Next Page">&rsaquo;</button>
         </div>
       </div>
     `;
+
+    // Safely set text content without relying solely on string concatenation
+    card.querySelector('.project-title').textContent = proj.title;
+    card.querySelector('.project-desc').textContent = proj.description;
 
     projectListContainer.appendChild(card);
 
@@ -105,7 +113,7 @@ async function initProjects() {
     });
 
     loadProjectPdf(idx, proj.file);
-  }
+  });
 }
 
 async function loadProjectPdf(idx, pdfUrl) {
@@ -131,8 +139,12 @@ async function renderProjectCanvas(idx, pageNum) {
 
   const canvas = document.getElementById(`project-canvas-${idx}`);
   const indicatorEl = document.getElementById(`page-indicator-${idx}`);
-
   if (!canvas) return;
+
+  // Cancel ongoing render task for this canvas if fast switching occurs
+  if (state.renderTasks[idx]) {
+    state.renderTasks[idx].cancel();
+  }
 
   try {
     const page = await pdfDoc.getPage(pageNum);
@@ -142,10 +154,13 @@ async function renderProjectCanvas(idx, pageNum) {
     canvas.height = viewport.height;
     canvas.width = viewport.width;
 
-    await page.render({
+    const renderTask = page.render({
       canvasContext: context,
       viewport: viewport
-    }).promise;
+    });
+
+    state.renderTasks[idx] = renderTask;
+    await renderTask.promise;
 
     if (indicatorEl) {
       indicatorEl.textContent = `Page ${pageNum} of ${pdfDoc.numPages}`;
@@ -153,12 +168,13 @@ async function renderProjectCanvas(idx, pageNum) {
 
     const prevBtn = document.querySelector(`.prev-btn[data-index="${idx}"]`);
     const nextBtn = document.querySelector(`.next-btn[data-index="${idx}"]`);
-    
+
     if (prevBtn) prevBtn.disabled = pageNum === 1;
     if (nextBtn) nextBtn.disabled = pageNum === pdfDoc.numPages;
-
   } catch (err) {
-    console.error(`Error rendering page ${pageNum}:`, err);
+    if (err?.name !== 'RenderingCancelledException') {
+      console.error(`Error rendering page ${pageNum}:`, err);
+    }
   }
 }
 
@@ -167,8 +183,8 @@ function changePage(idx, direction) {
   let currentPage = state.currentPages[idx] || 1;
 
   currentPage += direction;
-  if (currentPage < 1) currentPage = totalPages;
-  if (currentPage > totalPages) currentPage = 1;
+  if (currentPage < 1) currentPage = 1;
+  if (currentPage > totalPages) currentPage = totalPages;
 
   state.currentPages[idx] = currentPage;
   renderProjectCanvas(idx, currentPage);
@@ -185,8 +201,8 @@ function initModalListeners() {
   if (overlay) overlay.addEventListener('click', closeModal);
 
   document.addEventListener('keydown', (e) => {
-    if (modal.getAttribute('aria-hidden') === 'false') {
-      if (e.key === 'Escape') closeModal();
+    if (modal.getAttribute('aria-hidden') === 'false' && e.key === 'Escape') {
+      closeModal();
     }
   });
 }
@@ -210,7 +226,11 @@ async function renderModalCanvas(pageNum = 1) {
 
   const modalBody = document.querySelector('.modal-body');
   if (!modalBody) return;
-  
+
+  if (state.modal.renderTask) {
+    state.modal.renderTask.cancel();
+  }
+
   modalBody.innerHTML = '<canvas id="modalPdfCanvas"></canvas>';
   const canvas = document.getElementById('modalPdfCanvas');
 
@@ -222,28 +242,30 @@ async function renderModalCanvas(pageNum = 1) {
     canvas.height = viewport.height;
     canvas.width = viewport.width;
 
-    await page.render({
+    const renderTask = page.render({
       canvasContext: context,
       viewport: viewport
-    }).promise;
+    });
+
+    state.modal.renderTask = renderTask;
+    await renderTask.promise;
   } catch (err) {
-    console.error('Error rendering modal page:', err);
+    if (err?.name !== 'RenderingCancelledException') {
+      console.error('Error rendering modal page:', err);
+    }
   }
 }
 
 function closeModal() {
   const modal = document.getElementById('pdfModal');
   if (!modal) return;
+
+  if (state.modal.renderTask) {
+    state.modal.renderTask.cancel();
+    state.modal.renderTask = null;
+  }
+
   modal.setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';
   state.modal.pdfDoc = null;
-}
-
-function escapeHtml(str) {
-  return String(str || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
 }
