@@ -23,10 +23,10 @@ const defaultPortfolioData = {
         'This is an editorial photoshoot I captured in August, 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media.'
     },
     {
-      file: 'creativeprojects/Juggling Balls, Books, and Life.pdf',
-      title: 'Juggling Balls, Books, and Life',
-      description:
-        'A creative exploration of balancing multiple passions and responsibilities. This project visually captures the intersection of sports, literature, and personal development through dynamic photography and thoughtful composition.'
+          
+      "file": "creativeprojects/Juggling Balls, Books, & Life.pdf",
+      "title": "Juggling Balls, Books, & Life",
+      "description": "This is a feature I wrote in September, 2025. The feature follows a multipassionate student-athlete to tell his story. It was featured in the sports section of a student newspaper."
     }
   ]
 };
