@@ -9,26 +9,7 @@ const defaultPortfolioData = {
     'creativeprojects/02.pdf',
     'creativeprojects/03.pdf'
   ],
-  projects: [
-    {
-      file: 'creativeprojects/Campus Couture.pdf',
-      title: 'Campus Couture: Thematic Photoessay',
-      description:
-        "This is a thematic photoessay I created in May, 2025. The photoessay features three diverse university students' fashion, exploring how each student uses clothing to express themselves."
-    },
-    {
-      file: 'creativeprojects/Flower Boy.pdf',
-      title: 'Flower Boy: Editorial Photoshoot',
-      description:
-        'This is an editorial photoshoot I captured in August, 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media.'
-    },
-    {
-          
-      "file": "creativeprojects/Juggling Balls, Books, & Life.pdf",
-      "title": "Juggling Balls, Books, & Life",
-      "description": "This is a feature I wrote in September, 2025. The feature follows a multipassionate student-athlete to tell his story. It was published in the sports section of a student newspaper."
-    }
-  ]
+  projects: []
 };
 
 const state = {
