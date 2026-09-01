@@ -20,7 +20,13 @@ const defaultPortfolioData = {
       file: 'creativeprojects/Flower Boy.pdf',
       title: 'Flower Boy: Editorial Photoshoot',
       description:
-        'This is an editorial photoshoot I captured and edited in August, 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media.'
+        'This is an editorial photoshoot I captured in August, 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media.'
+    },
+    {
+      file: 'creativeprojects/Juggling Balls, Books, and Life.pdf',
+      title: 'Juggling Balls, Books, and Life',
+      description:
+        'A creative exploration of balancing multiple passions and responsibilities. This project visually captures the intersection of sports, literature, and personal development through dynamic photography and thoughtful composition.'
     }
   ]
 };
