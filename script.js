@@ -21,15 +21,7 @@ const defaultPortfolioData = {
       title: 'Flower Boy: Editorial Photoshoot',
       description:
         'This is an editorial photoshoot I captured and edited in August 2026. The photoshoot prominently features sunflowers to encapsulate both creativity and youth. Each photo was used to promote an upcoming creative project on social media.'
-    },
-    {
-      type: 'video',
-      file: 'creativeprojects/Cooking With Paulo.mp4',
-      title: 'Cooking With Paulo: Mock Episode',
-      description:
-        'This is a mock episode I produced with three fellow media students in April, 2025. The mock episode is a cooking show parody used for academic purposes.'
     }
-  ]
 };
 
 const state = {
