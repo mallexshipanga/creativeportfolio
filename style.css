@@ -155,11 +155,13 @@ p {
 
 .project-preview-wrapper {
   position: relative;
-  background: transparent !important;
+  background: #f0f0f0 !important;
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
   width: 100%;
+  height: auto;
+  min-height: 280px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -173,8 +175,8 @@ p {
 
 .project-canvas,
 video {
-  width: 100% !important;
-  height: auto !important;
+  width: 100%;
+  height: auto;
   display: block;
   transition: transform 0.3s ease;
 }
@@ -384,7 +386,7 @@ video {
   }
 
   .project-preview-wrapper {
-    height: 220px;
+    min-height: 220px;
   }
 
   .modal-container {
@@ -398,4 +400,3 @@ video {
     min-height: 250px;
   }
 }
-
