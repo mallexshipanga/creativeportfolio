@@ -101,7 +101,7 @@ async function initProjects() {
           </div>
         </div>
       `;
-
+      
       card.querySelector('.project-title').textContent = proj.title;
       card.querySelector('.project-desc').textContent = proj.description;
 
