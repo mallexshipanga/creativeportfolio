@@ -79,14 +79,6 @@ p {
   text-align: center;
 }
 
-#profile-pic {
-  width: 120px;
-  height: 120px;
-  border-radius: 16px;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
 .about-text {
   width: 100%;
 }
