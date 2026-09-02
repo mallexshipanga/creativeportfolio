@@ -155,15 +155,13 @@ p {
 
 .project-preview-wrapper {
   position: relative;
-  background-color: #000000 !important;
+  background-color: transparent !important;
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
   width: 100%;
-  height: 280px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  height: auto;
+  display: block;
   box-sizing: border-box;
 }
 
@@ -175,8 +173,7 @@ p {
 .project-canvas,
 video {
   width: 100% !important;
-  height: 100% !important;
-  object-fit: contain;
+  height: auto !important;
   display: block;
   transition: transform 0.3s ease;
 }
