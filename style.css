@@ -155,13 +155,14 @@ p {
 
 .project-preview-wrapper {
   position: relative;
-  background-color: transparent !important;
+  background: transparent !important;
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
   width: 100%;
-  height: auto;
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   box-sizing: border-box;
 }
 
